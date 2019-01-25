@@ -12,7 +12,7 @@ class BusinessService extends Service {
         let res_money = await db.collection('user').findOne({ _id: uid, status: 1, balance: { $gte: num } });
         if (res_money) {
             //扣除账号余额
-            await db.collection('sell').updateOne({ _id: uid }, { balance: { $inc: -num } });
+            await db.collection('user').updateOne({ _id:uid}, {$inc:{balance:-num}});
             //将订单插入系统交易表
             //获取自增序列
             let seqs = await handerThis.ctx.service.counter.getNextSequenceValue('business', 1);
@@ -30,7 +30,7 @@ class BusinessService extends Service {
             await db.collection('business').insertOne(options);
             //插入用户交易记录表
             let options_self = {
-                $put: {
+                $addToSet: {
                     sell: {
                         _id: seqs,//交易单号id，
                         is_read: 0 //是否阅读 0未阅读 1 已阅读
@@ -38,6 +38,7 @@ class BusinessService extends Service {
                 }
             }
             await db.collection('user_business').updateOne({ _id: uid }, options_self);
+            return data;
         } else {
             throw new Error("发布失败");
         }
@@ -58,16 +59,16 @@ class BusinessService extends Service {
             }
         }
         //查询卖币数量，卖币方式
-        let result = db.collection('business').find({ is_succ: 0 }, option).sort({ ctime: -1 }).toArray();
-        let uid = []
+        let result = await db.collection('business').find({ is_succ: 0 }, option).sort({ ctime: -1 }).toArray();
+        let uid = [];
         for (let i in result) {
             uid.push(result[i].sell_uid);
         }
         //查询成交数量
-        let order_num = db.collection('user_business').find({ order_num: { $in: uid } }, { projection: { order_num: 1, _id: 1 } }).toArray();
+        let order_num =await  db.collection('user_business').find({ _id: { $in: uid } }, { projection: { order_num: 1, _id: 1 } }).toArray();
         for (let i in result) {
             for (let j in order_num) {
-                if (result[i].sell_uid == order_num[j].id) {
+                if (result[i].sell_uid == order_num[j]._id) {
                     data.push({
                         money: result[i].money,
                         type: result[i].type,
@@ -94,16 +95,17 @@ class BusinessService extends Service {
             }
         }
         //查询卖币数量，卖币方式
-        let result = db.collection('business').find({ is_succ: 0, type: type, money: num }, option).sort({ ctime: -1 }).toArray();
+        let result = await  db.collection('business').find({ is_succ: 0, type: type, money: num }, option).sort({ ctime: -1 }).toArray();
+        console.log(result);
         let uid = []
         for (let i in result) {
             uid.push(result[i].sell_uid);
         }
         //查询成交数量
-        let order_num = db.collection('user_business').find({ order_num: { $in: uid } }, { projection: { order_num: 1, _id: 1 } }).toArray();
+        let order_num = await db.collection('user_business').find({ _id: { $in: uid } }, { projection: { order_num: 1, _id: 1 } }).toArray();
         for (let i in result) {
             for (let j in order_num) {
-                if (result[i].sell_uid == order_num[j].id) {
+                if (result[i].sell_uid == order_num[j]._id) {
                     data.push({
                         money: result[i].money,
                         type: result[i].type,
@@ -170,18 +172,85 @@ class BusinessService extends Service {
      * @param {*} uid 
      * @param {*} id 
      */
-    async query_news_info(uid,id) {
+    async query_news_info(uid, id) {
         let handerThis = this;
         const { ctx, app } = handerThis;
         let db = this.app.mongo.get('GOPAY')['db'];//获取数据库实例 
         let data = {};
         let result = await db.collection('user_business').findOne({ _id: uid });
-        let buy_name=await db.collection('user').findOne({_id:result.buy_coin},{projection:{name:1}});
-        await db.collection('user_business').updateOne({_id:uid,'sell._id':id},{$set:{'sell.is_read':1}});
-        data.sell_coin=buy_name.name;
-        data.money=result.money;
-        data.utime=result.utime;
+        let buy_name = await db.collection('user').findOne({ _id: result.buy_coin }, { projection: { name: 1 } });
+        await db.collection('user_business').updateOne({ _id: uid, 'sell._id': id }, { $set: { 'sell.is_read': 1 } });
+        data.sell_coin = buy_name.name;
+        data.money = result.money;
+        data.utime = result.utime;
         return data;
+    }
+    /**
+   * 用户查看交易记录
+   */
+    async query_business(uid) {
+        let handerThis = this;
+        const { ctx, app } = handerThis;
+        let db = this.app.mongo.get('GOPAY')['db'];//获取数据库实例 
+        let data = {
+            sell: {
+                succ:[],
+                dissucc:[]
+            },
+            buy: []
+        };
+        let res_uid=await db.collection('business').find({sell_uid:uid,is_succ:1},{sort:{ctime:-1}}).toArray();
+        let uid=[];
+        for (let j in res_uid){
+              uid.push(res_uid[j].buy_uid);
+        }
+        let result =await db.collection('user').find({_id:{$in:uid}},{projection:{_id:1,name:1}}).toArray();
+        let result_sell =await db.collection('business').find({sell_uid:uid},{sort:{ctime:-1}}).toArray();
+        for(let i in result_sell){
+            if(result_sell[i].is_succ===0){
+                data.sell.dissucc.push({
+                    money:result_sell[i].money,
+                    type:result_sell[i],type,
+                    ctime:result_sell[i].ctime
+                })
+            }else{
+                for(let k in result){
+                    if(result_sell[i].buy_uid===result[k]._id){
+                        data.sell.succ.push({
+                            money:result_sell[i].money,
+                            type:result_sell[i],type,
+                            buy_name:result[k].name,
+                            ctime:result_sell[i].ctime,
+                            utime:result_sell[i].ctime
+                        })
+                    }
+                    break;
+                }
+               
+            }
+        }
+        let result_buy=await db.collection('business').find({buy_uid:uid},{sort:{ctime:-1}}).toArray();
+        let sell_uid=[];
+        for(let u in result_buy){
+            sell_uid.push(result_buy[u].sell_uid);
+        }
+        let sell_name=await db.collection('user').find({_id:{$in:sell_uid}},{projection:{_id:1,name:1}}).toArray();
+        for(let y in result_buy){
+            for(let s in sell_name){
+                if(result_buy[y].sell_uid===sell_name[s]._id){
+                    data.buy.push({
+                        money:result_sell[i].money,
+                        type:result_sell[i],type,
+                        sell_name:result[k].name,
+                        utime:result_sell[i].utime,
+                    })
+                }
+                break;
+            }
+            
+        }
+        return data;
+       
     }
 }
 module.exports = BusinessService

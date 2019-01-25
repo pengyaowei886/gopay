@@ -33,6 +33,7 @@ class UserService extends Service {
                     phone: phone,
                     password: password,
                     head_pic:"",
+                    balance:0,
                     // business_num: 0, //交易总次数
                     // star_num: 0, //评价总星星数
                     status: 1, //账号是否被冻结
@@ -40,7 +41,14 @@ class UserService extends Service {
                 }
                 //插入用户
                 await db.collection('user').insertOne(options);
-                return data;
+                let insert={
+                    _id:seqs,
+                    order_num:0,
+                    sell:[],
+                    buy:[]
+                }
+                //插入用户交易记录表
+                await db.collection ('user_business').insertOne(insert);
             } else {
                 throw new Error("验证码错误或者超时");
             }

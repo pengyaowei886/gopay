@@ -31,11 +31,11 @@ router.get('/gopay/app/user/order/like',loginVerify,controller.business.query_or
 //发布卖币信息
 router.post('/gopay/app/user/sell',loginVerify,controller.business.sell_coin);
 //用户完成购买(事务操作)
-router.put('/gopay/app/user/buy',loginVerify,controller.user.buy_coin);
+router.put('/gopay/app/user/buy',loginVerify,controller.business.buy_coin);
 //查看用户交易记录
-router.get('/gopay/app/user/business',loginVerify,controller.user.query_business);
+router.get('/gopay/app/user/business',loginVerify,controller.business.query_business);
 //用户查看通知列表
-router.get('/gopay/app/user/news/list',loginVerify,controller.user.query_news_list);
+router.get('/gopay/app/user/news/list',loginVerify,controller.business.query_news_list);
 //用户查看通知具体详情
-router.get('/gopay/app/user/news',loginVerify,controller.user.query_news_info);
+router.get('/gopay/app/user/news',loginVerify,controller.business.query_news_info);
 }

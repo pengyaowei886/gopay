@@ -11,7 +11,7 @@ class BusinessController extends Controller {
             //使用插件进行验证 validate    
             ctx.validate({
                 type: {   //1微信 2支付宝 3银行卡
-                    type: 'string', required: true, allowEmpty: false
+                    type: 'int', required: true, allowEmpty: false
                 },
                 num: { //币种数量
                     type: 'int', required: true, allowEmpty: false
@@ -61,10 +61,10 @@ class BusinessController extends Controller {
             //使用插件进行验证 validate    
             ctx.validate({
                 type: { //类型
-                    type: 'int', required: true, allowEmpty: false
+                    type: 'string', required: true, allowEmpty: false
                 },
                 num: { //币种数量
-                    type: 'int', required: true, allowEmpty: false
+                    type: 'string', required: true, allowEmpty: false
                 }
             }, ctx.request.query);
         } catch (e) {
@@ -76,8 +76,8 @@ class BusinessController extends Controller {
             return handerThis.error('PARAMETERS_ERROR', logContent);
         }
         try {
-            let type = ctx.request.query.type;
-            let num = ctx.request.query.num;
+            let type =Number( ctx.request.query.type);
+            let num = Number( ctx.request.query.num);
             let data = await service.business.query_order_likeList(type, num);
             return handerThis.succ(data);
         } catch (error) {
@@ -130,7 +130,10 @@ class BusinessController extends Controller {
             return handerThis.error('HANDLE_ERROR', error['message']);
         }
     }
-    async query_news_info(){
+    /**
+     * 用户查看通知具体详情
+     */
+    async query_news_info() {
         let handerThis = this;
         const { ctx, app, service } = handerThis;
         //参数校验
@@ -153,6 +156,20 @@ class BusinessController extends Controller {
             let uid = handerThis.user().uid;
             let id = ctx.request.body.id;
             let data = await service.business.query_news_info(uid, id);
+            return handerThis.succ(data);
+        } catch (error) {
+            return handerThis.error('HANDLE_ERROR', error['message']);
+        }
+    }
+    /**
+    * 用户查看交易记录
+    */
+    async query_business() {
+        let handerThis = this;
+        const { ctx, app, service } = handerThis;
+        try {
+            let uid = handerThis.user().uid;
+            let data = await service.business.query_business(uid);
             return handerThis.succ(data);
         } catch (error) {
             return handerThis.error('HANDLE_ERROR', error['message']);
