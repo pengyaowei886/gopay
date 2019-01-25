@@ -76,7 +76,7 @@ class UserService extends Service {
             body: JSON.stringify(requestData)
         })
         //判断code
-        if (return_data.code === 000000) {
+        if (return_data.code === 0) {
             await db.collection('duanxin').insertOne({ uid: phone, param: param, ctime: new Date() });
             return null
         } else {
