@@ -4,12 +4,14 @@
   "description": "",
   "private": true,
   "dependencies": {
+    "await-stream-ready": "^1.0.1",
     "egg": "^2.2.1",
     "egg-cluster": "^1.22.2",
     "egg-cors": "^2.1.2",
     "egg-mongo-native": "^3.3.0",
     "egg-scripts": "^2.5.0",
-    "egg-validate": "^2.0.2"
+    "egg-validate": "^2.0.2",
+    "stream-wormhole": "^1.1.0"
   },
   "devDependencies": {
     "autod": "^3.0.1",

@@ -15,15 +15,16 @@ router.post('/gopay/app/user/register',controller.user.register);
 router.get('/gopay/app/user/login',controller.user.login);
 //用户修改密码
 router.put('/gopay/app/user/password',loginVerify,controller.user.update_pw);
-//修改昵称和头像
-
+//修改昵称，头像
+router.put('/gopay/app/user/baseinfo',loginVerify,controller.user.update_info);
 //查看用户基本信息
-
-//上传微信，支付宝二维码图片
-
+router.get('/gopay/app/user/info',loginVerify,controller.user.query_user_info);
+//查看用户支付信息
+router.get('/gopay/app/user/pay/info',loginVerify,controller.user.query_pay_info);
+//上传图片
+router.post('/gopay/app/user/upload',controller.user.uoloadImg);
 //上传银行卡信息
-
-
+// router.post('/gopay/app/user/bank',controller.user.save_bank_info);
 //查看卖币列表
 router.get('/gopay/app/user/order/list',loginVerify,controller.business.query_order_list);
 //按条件检索卖币列表

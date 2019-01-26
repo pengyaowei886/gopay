@@ -20,22 +20,33 @@ module.exports = appInfo => {
       credentials: true,
       origin:'*'
     }
-  config.mongo = {
-    clients: {
-      GOPAY: {
-        host: '116.196.93.58',
-        port: '50107',
-        name: 'game',
-        user: 'admin',
-        password: '159370pyw',
-        options: {useNewUrlParser: true},
+    config.mongo = {
+      clients: {
+        GOPAY: {
+          host: '127.0.0.1',
+          port: '51234',
+          name: 'gopay',
+          user: '',
+          password: '',
+          options: {useNewUrlParser: true},
+        }
       }
-    }
-  };
+    };
   //token加密方式
   config.GOPAY={
     key : '9vApxLk5G3PAsJrM', //16位 对称公钥
     iv : 'FnJL7EDzjqWjcaY9',  //16位 偏移量
- }
+ };
+ config.cluster= {
+  listen: {
+    port: 80,
+    hostname: '192.168.1.11',
+    // https:{
+    //   key:"D:/work/ssl/0_xingyumeng.com.key",
+    //   cert:"D:/worssl/1_xingyumeng.com_bundle.pem"
+    //  }
+  },
+  
+};
   return config;
 };
