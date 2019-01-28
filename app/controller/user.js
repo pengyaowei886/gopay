@@ -88,7 +88,7 @@ class UserController extends Controller {
     /**
      * 用户登陆
      */
-    async login() {
+    async login(){
         let handerThis = this;
         const { ctx, app, service } = handerThis;
         //参数校验
@@ -162,10 +162,10 @@ class UserController extends Controller {
         try {
             //使用插件进行验证 validate    
             ctx.validate({
-                new_name: {//字符串 必填 不允许为空字符串 
+                new_name: {//字符串 必填 允许为空字符串 
                     type: 'string', required: true, allowEmpty: true
                 },
-                head_pic: {//字符串 必填 不允许为空字符串 
+                head_pic: {//字符串 必填 允许为空字符串 
                     type: 'string', required: true, allowEmpty: true
                 },
             }, ctx.request.body);
@@ -299,7 +299,7 @@ class UserController extends Controller {
             // 异步把文件流 写入
             await awaitWriteStream(stream.pipe(writeStream));
             let data={};
-            data.url ="http://127.0.0.1:80/public/img"+filename;
+            data.url ="http://192.168.1.11:80/public/img"+filename;
             return handerThis.succ(data);
         } catch (err) {
             // 如果出现错误，关闭管道

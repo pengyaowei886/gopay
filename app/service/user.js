@@ -170,14 +170,14 @@ class UserService extends Service {
         if (res_exit) {
             //修改密码
             let options;
-            if (name = null) {
+            if (name == null) {
                 options = {
                     $set: {
                         head_pic: head_pic
                     }
                 }
             };
-            if (head_pic = null) {
+            if (head_pic == null) {
                 options = {
                     $set: {
                         name: name

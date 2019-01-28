@@ -5,8 +5,8 @@ module.exports = appInfo => {
   // use for cookie sign key, should change to your own and keep security
   config.keys = appInfo.name + '_1536805618764_2318';
 
-  // add your config here
-  // config.middleware = ['loginVerify'];
+  //add your config here
+  config.middleware = ['loginVerify'];
 
 //安全验证
   config.security = {

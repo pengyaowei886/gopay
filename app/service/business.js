@@ -12,7 +12,7 @@ class BusinessService extends Service {
         let res_money = await db.collection('user').findOne({ _id: uid, status: 1, balance: { $gte: num } });
         if (res_money) {
             //扣除账号余额
-            await db.collection('user').updateOne({ _id:uid}, {$inc:{balance:-num}});
+            await db.collection('user').updateOne({ _id: uid }, { $inc: { balance: -num } });
             //将订单插入系统交易表
             //获取自增序列
             let seqs = await handerThis.ctx.service.counter.getNextSequenceValue('business', 1);
@@ -44,6 +44,28 @@ class BusinessService extends Service {
         }
     }
     /**
+ * 用户下架货币
+ */
+    async delete_coin(uid, id) {
+        let handerThis = this;
+        const { ctx, app } = handerThis;
+        let db = this.app.mongo.get('GOPAY')['db'];//获取数据库实例
+        let data = {};
+        //删除总记录
+        let result = await db.collection('business').findOne({ _id: id });
+        await db.collection('business').deleteOne({ _id: id });
+        //恢复余额
+        await db.collection('user').updateOne({ _id: id }, { $inc: { balance: result.money } });
+        let options = {
+            $pull: {
+                "sell._id": id
+            }
+        }
+        //修改用户订单表
+        await db.collection('user_business').updateOne({ _id: uid }, options);
+        return data;
+    }
+    /**
      * 查看卖币列表
      */
     async query_order_list() {
@@ -65,7 +87,7 @@ class BusinessService extends Service {
             uid.push(result[i].sell_uid);
         }
         //查询成交数量
-        let order_num =await  db.collection('user_business').find({ _id: { $in: uid } }, { projection: { order_num: 1, _id: 1 } }).toArray();
+        let order_num = await db.collection('user_business').find({ _id: { $in: uid } }, { projection: { order_num: 1, _id: 1 } }).toArray();
         for (let i in result) {
             for (let j in order_num) {
                 if (result[i].sell_uid == order_num[j]._id) {
@@ -95,7 +117,7 @@ class BusinessService extends Service {
             }
         }
         //查询卖币数量，卖币方式
-        let result = await  db.collection('business').find({ is_succ: 0, type: type, money: num }, option).sort({ ctime: -1 }).toArray();
+        let result = await db.collection('business').find({ is_succ: 0, type: type, money: num }, option).sort({ ctime: -1 }).toArray();
         console.log(result);
         let uid = []
         for (let i in result) {
@@ -194,63 +216,63 @@ class BusinessService extends Service {
         let db = this.app.mongo.get('GOPAY')['db'];//获取数据库实例 
         let data = {
             sell: {
-                succ:[],
-                dissucc:[]
+                succ: [],
+                dissucc: []
             },
             buy: []
         };
-        let res_uid=await db.collection('business').find({sell_uid:uid,is_succ:1},{sort:{ctime:-1}}).toArray();
-        let uid=[];
-        for (let j in res_uid){
-              uid.push(res_uid[j].buy_uid);
+        let res_uid = await db.collection('business').find({ sell_uid: uid, is_succ: 1 }, { sort: { ctime: -1 } }).toArray();
+        let uid = [];
+        for (let j in res_uid) {
+            uid.push(res_uid[j].buy_uid);
         }
-        let result =await db.collection('user').find({_id:{$in:uid}},{projection:{_id:1,name:1}}).toArray();
-        let result_sell =await db.collection('business').find({sell_uid:uid},{sort:{ctime:-1}}).toArray();
-        for(let i in result_sell){
-            if(result_sell[i].is_succ===0){
+        let result = await db.collection('user').find({ _id: { $in: uid } }, { projection: { _id: 1, name: 1 } }).toArray();
+        let result_sell = await db.collection('business').find({ sell_uid: uid }, { sort: { ctime: -1 } }).toArray();
+        for (let i in result_sell) {
+            if (result_sell[i].is_succ === 0) {
                 data.sell.dissucc.push({
-                    money:result_sell[i].money,
-                    type:result_sell[i],type,
-                    ctime:result_sell[i].ctime
+                    money: result_sell[i].money,
+                    type: result_sell[i], type,
+                    ctime: result_sell[i].ctime
                 })
-            }else{
-                for(let k in result){
-                    if(result_sell[i].buy_uid===result[k]._id){
+            } else {
+                for (let k in result) {
+                    if (result_sell[i].buy_uid === result[k]._id) {
                         data.sell.succ.push({
-                            money:result_sell[i].money,
-                            type:result_sell[i],type,
-                            buy_name:result[k].name,
-                            ctime:result_sell[i].ctime,
-                            utime:result_sell[i].ctime
+                            money: result_sell[i].money,
+                            type: result_sell[i], type,
+                            buy_name: result[k].name,
+                            ctime: result_sell[i].ctime,
+                            utime: result_sell[i].ctime
                         })
                     }
                     break;
                 }
-               
+
             }
         }
-        let result_buy=await db.collection('business').find({buy_uid:uid},{sort:{ctime:-1}}).toArray();
-        let sell_uid=[];
-        for(let u in result_buy){
+        let result_buy = await db.collection('business').find({ buy_uid: uid }, { sort: { ctime: -1 } }).toArray();
+        let sell_uid = [];
+        for (let u in result_buy) {
             sell_uid.push(result_buy[u].sell_uid);
         }
-        let sell_name=await db.collection('user').find({_id:{$in:sell_uid}},{projection:{_id:1,name:1}}).toArray();
-        for(let y in result_buy){
-            for(let s in sell_name){
-                if(result_buy[y].sell_uid===sell_name[s]._id){
+        let sell_name = await db.collection('user').find({ _id: { $in: sell_uid } }, { projection: { _id: 1, name: 1 } }).toArray();
+        for (let y in result_buy) {
+            for (let s in sell_name) {
+                if (result_buy[y].sell_uid === sell_name[s]._id) {
                     data.buy.push({
-                        money:result_sell[i].money,
-                        type:result_sell[i],type,
-                        sell_name:result[k].name,
-                        utime:result_sell[i].utime,
+                        money: result_sell[i].money,
+                        type: result_sell[i], type,
+                        sell_name: result[k].name,
+                        utime: result_sell[i].utime,
                     })
                 }
                 break;
             }
-            
+
         }
         return data;
-       
+
     }
 }
 module.exports = BusinessService

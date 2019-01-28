@@ -6,7 +6,6 @@
 module.exports = app => {
   const { router, controller, middleware } = app;
   let loginVerify=middleware.loginVerify({})//用户身份验证
-
 //用户注册请求短信验证码
 router.get('/gopay/app/user/register/duanxin',controller.user.req_dx);
 //用户完成注册（并验证短信验证码）
@@ -23,14 +22,18 @@ router.get('/gopay/app/user/info',loginVerify,controller.user.query_user_info);
 router.get('/gopay/app/user/pay/info',loginVerify,controller.user.query_pay_info);
 //上传图片
 router.post('/gopay/app/user/upload',controller.user.uoloadImg);
-//上传银行卡信息
-// router.post('/gopay/app/user/bank',controller.user.save_bank_info);
+//上传支付信息
+ router.post('/gopay/app/user/pay/info',controller.user.save_pay_info);
 //查看卖币列表
 router.get('/gopay/app/user/order/list',loginVerify,controller.business.query_order_list);
 //按条件检索卖币列表
 router.get('/gopay/app/user/order/like',loginVerify,controller.business.query_order_likeList);
 //发布卖币信息
 router.post('/gopay/app/user/sell',loginVerify,controller.business.sell_coin);
+// //查看用户未成交卖单列表
+// router.get('/gopay/app/user/sell/record/dissucc',loginVerify,controller.business.query_dissucc_record);
+//下架货币
+router.delete('/gopay/app/user/delete',loginVerify,controller.business.delete_coin);
 //用户完成购买(事务操作)
 router.put('/gopay/app/user/buy',loginVerify,controller.business.buy_coin);
 //查看用户交易记录
