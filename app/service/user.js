@@ -111,7 +111,7 @@ class UserService extends Service {
         const { ctx, app } = handerThis;
         let db = this.app.mongo.get('GOPAY')['db'];//获取数据库WLWord
         const key = Buffer.from(app.config.GOPAY.key, 'utf8');//16位 对称公钥
-        const iv = Buffer.from(app.config.GOPAY.iv, 'utf8');  //偏移量
+        const iv = Buffer.from(app.config.GOPAY.iv.toString(), 'utf8');  //偏移量
         let data = {};
         let res_exit = await db.collection('user').findOne({ phone: phone, password: password });
         if (res_exit) {//用户存在
@@ -142,7 +142,7 @@ class UserService extends Service {
         let db = this.app.mongo.get('GOPAY')['db'];//获取数据库WLWord
         let data = {};
         const key = Buffer.from(app.config.GOPAY.key, 'utf8');//16位 对称公钥
-        const iv = Buffer.from(app.config.GOPAY.iv, 'utf8');  //偏移量
+        const iv = Buffer.from(app.config.GOPAY.iv.toString(), 'utf8');  //偏移量
         let res_exit = await db.collection('user').findOne({ _id: uid });
         if (res_exit) {
             //修改密码

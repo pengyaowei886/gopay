@@ -30,8 +30,8 @@ router.get('/gopay/app/user/order/list',loginVerify,controller.business.query_or
 router.get('/gopay/app/user/order/like',loginVerify,controller.business.query_order_likeList);
 //发布卖币信息
 router.post('/gopay/app/user/sell',loginVerify,controller.business.sell_coin);
-// //查看用户未成交卖单列表
-// router.get('/gopay/app/user/sell/record/dissucc',loginVerify,controller.business.query_dissucc_record);
+//查看用户未成交卖单列表
+router.get('/gopay/app/user/sell/record/dissucc',loginVerify,controller.business.query_dissucc_record);
 //下架货币
 router.delete('/gopay/app/user/delete',loginVerify,controller.business.delete_coin);
 //用户完成购买(事务操作)
@@ -41,5 +41,5 @@ router.get('/gopay/app/user/business',loginVerify,controller.business.query_busi
 //用户查看通知列表
 router.get('/gopay/app/user/news/list',loginVerify,controller.business.query_news_list);
 //用户查看通知具体详情
-router.get('/gopay/app/user/news',loginVerify,controller.business.query_news_info);
+router.put('/gopay/app/user/news',loginVerify,controller.business.query_news_info);
 }

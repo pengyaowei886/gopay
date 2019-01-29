@@ -299,7 +299,7 @@ class UserController extends Controller {
             // 异步把文件流 写入
             await awaitWriteStream(stream.pipe(writeStream));
             let data={};
-            data.url ="http://192.168.1.11:80/public/img"+filename;
+            data.url ="http://192.168.1.11:80/public/img/"+filename;
             return handerThis.succ(data);
         } catch (err) {
             // 如果出现错误，关闭管道

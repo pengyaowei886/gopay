@@ -7,7 +7,6 @@ let Verify = function (options) {
         } else {
                     //解析token 获得uid
             let db = ctx.app.mongo.get('GOPAY')['db'];//获取数据库实例
-            console.log(ctx);
             let token = ctx.request.header.token;
             let result = await db.collection('token').findOne({ token: token });//数据库要加索引，待优化
             if (result) {
@@ -27,7 +26,7 @@ let Verify = function (options) {
             await next();
         }
 
-
+        // ctx.session['user'] = { uid: 3 };
     }
 }
 module.exports = Verify

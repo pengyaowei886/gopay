@@ -209,5 +209,19 @@ class BusinessController extends Controller {
             return handerThis.error('HANDLE_ERROR', error['message']);
         }
     }
+    /**
+     * 查看用户未成交卖单列表
+     */
+    async query_dissucc_record(){
+        let handerThis = this;
+        const { ctx, app, service } = handerThis;
+        try {
+            let uid = handerThis.user().uid;
+            let data = await service.business.query_dissucc_record(uid);
+            return handerThis.succ(data);
+        } catch (error) {
+            return handerThis.error('HANDLE_ERROR', error['message']);
+        }
+    }
 }
 module.exports = BusinessController

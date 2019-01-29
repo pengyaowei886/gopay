@@ -35,7 +35,7 @@ module.exports = appInfo => {
   //token加密方式
   config.GOPAY={
     key : '9vApxLk5G3PAsJrM', //16位 对称公钥
-    iv : 'FnJL7EDzjqWjcaY9',  //16位 偏移量
+    iv : Date.now()*1000,  //16位 偏移量
  };
  config.cluster= {
   listen: {
