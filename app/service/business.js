@@ -270,6 +270,7 @@ class BusinessService extends Service {
             for (let i in res_uid) {
                 if (result_sell[k].buy_uid === res_uid[i]._id) {
                     data.sell.push({
+                        id:result_sell[k]._id,
                         money: result_sell[k].money,
                         type: result_sell[k].type,
                         buy_name: res_uid[i].name,
@@ -293,11 +294,12 @@ class BusinessService extends Service {
             for (let s in sell_name) {
                 if (result_buy[y].sell_uid === sell_name[s]._id) {
                     data.buy.push({
-                        money: result_sell[i].money,
-                        type: result_sell[i], type,
-                        sell_name: result[k].name,
-                        head_pic: result[k].head_pic,
-                        utime: result_sell[i].utime,
+                        id:result_buy[y]._id,
+                        money: result_buy[y].money,
+                        type: result_buy[y].type,
+                        sell_name: sell_name[s].name,
+                        head_pic: sell_name[s].head_pic,
+                        utime: result_buy[y].utime,
                     })
                 }
                 break;
