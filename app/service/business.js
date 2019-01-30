@@ -248,87 +248,95 @@ class BusinessService extends Service {
     /**
    * 用户查看交易记录
    */
-    async query_business(uid) {
-        let handerThis = this;
-        const { ctx, app } = handerThis;
-        let db = this.app.mongo.get('GOPAY')['db'];//获取数据库实例 
-        let data = {
-            sell: [],
-            buy: []
-        };
-        //查询卖币信息
-        let result_sell = await db.collection('business').find({ sell_uid: uid, is_succ: 1 }, { sort: { ctime: -1 } }).toArray();
-
-
-        let uid_array = [];
-        for (let j in result_sell) {
-            uid_array.push(result_sell[j].buy_uid);
-        }
-        //查询买方姓名
-        let res_uid = await db.collection('user').find({ _id: { $in: uid_array } }, { projection: { _id: 1, name: 1, head_pic: 1 } }).toArray();
-        for (let k in result_sell) {
-            for (let i in res_uid) {
-                if (result_sell[k].buy_uid === res_uid[i]._id) {
-                    data.sell.push({
-                        id:result_sell[k]._id,
-                        money: result_sell[k].money,
-                        type: result_sell[k].type,
-                        buy_name: res_uid[i].name,
-                        head_pic: res_uid[i].head_pic,
-                        ctime: result_sell[k].ctime,
-                        utime: result_sell[k].ctime
-                    })
-                    break;
-                }
-            }
-        }
-
-        //查询卖币信息
-        let result_buy = await db.collection('business').find({ buy_uid: uid }, { sort: { ctime: -1 } }).toArray();
-        let sell_uid = [];
-        for (let u in result_buy) {
-            sell_uid.push(result_buy[u].sell_uid);
-        }
-        let sell_name = await db.collection('user').find({ _id: { $in: sell_uid } }, { projection: { _id: 1, name: 1 } }).toArray();
-        for (let y in result_buy) {
-            for (let s in sell_name) {
-                if (result_buy[y].sell_uid === sell_name[s]._id) {
-                    data.buy.push({
-                        id:result_buy[y]._id,
-                        money: result_buy[y].money,
-                        type: result_buy[y].type,
-                        sell_name: sell_name[s].name,
-                        head_pic: sell_name[s].head_pic,
-                        utime: result_buy[y].utime,
-                    })
-                }
-                break;
-            }
-
-        }
-        return data;
-
-    }
-    /**
- * 用户查看未成交卖单信息
- */
-    async query_dissucc_record(uid) {
+    async query_business(uid, type) {
         let handerThis = this;
         const { ctx, app } = handerThis;
         let db = this.app.mongo.get('GOPAY')['db'];//获取数据库实例 
         let data = {
             info: []
         };
-        let result = await db.collection('business').find({ sell_uid: uid, is_succ: 0 }, {
+        if (type === 1) {
+            //查询卖币信息
+            let result_sell = await db.collection('business').find({ sell_uid: uid, is_succ: 1 }, { sort: { ctime: -1 } }).toArray();
+
+
+            let uid_array = [];
+            for (let j in result_sell) {
+                uid_array.push(result_sell[j].buy_uid);
+            }
+            //查询买方姓名
+            let res_uid = await db.collection('user').find({ _id: { $in: uid_array } }, { projection: { _id: 1, name: 1, head_pic: 1 } }).toArray();
+            for (let k in result_sell) {
+                for (let i in res_uid) {
+                    if (result_sell[k].buy_uid === res_uid[i]._id) {
+                        data.info.push({
+                            id: result_sell[k]._id,
+                            money: result_sell[k].money,
+                            type: result_sell[k].type,
+                            buy_name: res_uid[i].name,
+                            head_pic: res_uid[i].head_pic,
+                            ctime: result_sell[k].ctime,
+                            utime: result_sell[k].ctime
+                        })
+                        break;
+                    }
+                }
+            }
+            return data;
+        }
+        if (type === 2) {
+            //查询卖币信息
+            let result_buy = await db.collection('business').find({ buy_uid: uid }, { sort: { ctime: -1 } }).toArray();
+            let sell_uid = [];
+            for (let u in result_buy) {
+                sell_uid.push(result_buy[u].sell_uid);
+            }
+            let sell_name = await db.collection('user').find({ _id: { $in: sell_uid } }, { projection: { _id: 1, name: 1 } }).toArray();
+            for (let y in result_buy) {
+                for (let s in sell_name) {
+                    if (result_buy[y].sell_uid === sell_name[s]._id) {
+                        data.info.push({
+                            id: result_buy[y]._id,
+                            money: result_buy[y].money,
+                            type: result_buy[y].type,
+                            sell_name: sell_name[s].name,
+                            head_pic: sell_name[s].head_pic,
+                            utime: result_buy[y].utime,
+                        })
+                    }
+                    break;
+                }
+
+            }
+            return data;
+        }
+
+    }
+    /**
+ * 用户查看未成交卖单信息
+ */
+    async query_dissucc_record(uid,type) {
+        let handerThis = this;
+        const { ctx, app } = handerThis;
+        let db = this.app.mongo.get('GOPAY')['db'];//获取数据库实例 
+        let data = {
+            info: []
+        };
+        let option={
+            sell_uid: uid, 
+            is_succ: 0 ,
+            type:type
+        }
+        let result = await db.collection('business').find(option, {
             projection: {
-                _id:0,
+                _id: 0,
                 money: 1,
                 type: 1,
                 ctime: 1
             }
         }).toArray();
-           data.info=result;
-           return data;
+        data.info = result;
+        return data;
 
     }
 }

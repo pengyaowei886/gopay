@@ -200,7 +200,7 @@ class UserService extends Service {
         let db = this.app.mongo.get('GOPAY')['db'];//获取数据库WLWord
         let data = {};
         //修改密码
-        let result = await db.collection('user').findOne({ _id: uid }, { projection: { name: 1, head_pic: 1, balance: 1, _id: 0 } });
+        let result = await db.collection('user').findOne({ _id: uid }, { projection: { name: 1, phone:1,head_pic: 1, balance: 1, _id: 0 } });
         if (result) {
             data.info = result;
             return data;

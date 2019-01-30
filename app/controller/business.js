@@ -203,7 +203,8 @@ class BusinessController extends Controller {
         const { ctx, app, service } = handerThis;
         try {
             let uid = handerThis.user().uid;
-            let data = await service.business.query_business(uid);
+            let type= Number( ctx.request.query.type);
+            let data = await service.business.query_business(uid,type);
             return handerThis.succ(data);
         } catch (error) {
             return handerThis.error('HANDLE_ERROR', error['message']);
@@ -217,7 +218,8 @@ class BusinessController extends Controller {
         const { ctx, app, service } = handerThis;
         try {
             let uid = handerThis.user().uid;
-            let data = await service.business.query_dissucc_record(uid);
+            let type= Number( ctx.request.query.type);
+            let data = await service.business.query_dissucc_record(uid,type);
             return handerThis.succ(data);
         } catch (error) {
             return handerThis.error('HANDLE_ERROR', error['message']);
