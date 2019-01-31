@@ -2,7 +2,7 @@
 let Verify = function (options) {
     return async function loginVerify(ctx, next) {
 //登陆或者注册放过token检测
-        if (ctx.request.url.indexOf('/gopay/app/user/login') >= 0 || ctx.request.url.indexOf('/gopay/app/user/register') >= 0) {
+        if (ctx.request.url.indexOf('/gopay/app/user/login') >= 0 || ctx.request.url.indexOf('/gopay/app/user/register') >= 0||ctx.request.url.indexOf('/gopay/app/user/erweima')) {
             await next();
         } else {
                     //解析token 获得uid

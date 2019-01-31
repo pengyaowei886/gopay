@@ -34,7 +34,8 @@ router.post('/gopay/app/user/sell',loginVerify,controller.business.sell_coin);
 router.get('/gopay/app/user/sell/record/dissucc',loginVerify,controller.business.query_dissucc_record);
 //下架货币
 router.delete('/gopay/app/user/delete',loginVerify,controller.business.delete_coin);
-//用户完成购买(事务操作)
+//用户完成购买(事务操作) 
+
 router.put('/gopay/app/user/buy',loginVerify,controller.business.buy_coin);
 //查看用户交易记录
 router.get('/gopay/app/user/business',loginVerify,controller.business.query_business);
@@ -42,4 +43,8 @@ router.get('/gopay/app/user/business',loginVerify,controller.business.query_busi
 router.get('/gopay/app/user/news/list',loginVerify,controller.business.query_news_list);
 //用户查看通知具体详情
 router.put('/gopay/app/user/news',loginVerify,controller.business.query_news_info);
+//用户启用扫一扫转账
+router.get('/gopay/app/user/saoyisao',loginVerify,controller.business.sao_business);
+//用户生成二维码
+ router.get('/gopay/app/user/erweima',loginVerify,controller.business.succ_erweima);
 }

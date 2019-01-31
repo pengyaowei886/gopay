@@ -8,7 +8,7 @@ class UserService extends Service {
      * @param {*密码} password 
      * @param {*昵称} name 
      */
-    async register(phone, password, name, param) {
+    async register(phone, password, name, param,pay_password) {
         let handerThis = this;
         const { ctx, app } = handerThis;
 
@@ -35,6 +35,7 @@ class UserService extends Service {
                     name: name,
                     phone: phone,
                     password: password,
+                    pay_password:pay_password,
                     head_pic: "",
                     balance: 0,
                     // business_num: 0, //交易总次数
@@ -168,7 +169,7 @@ class UserService extends Service {
         let data = {};
         let res_exit = await db.collection('user').findOne({ _id: uid });
         if (res_exit) {
-            //修改密码
+     
             let options;
             if (name == null) {
                 options = {
@@ -200,7 +201,7 @@ class UserService extends Service {
         let db = this.app.mongo.get('GOPAY')['db'];//获取数据库WLWord
         let data = {};
         //修改密码
-        let result = await db.collection('user').findOne({ _id: uid }, { projection: { name: 1, phone:1,head_pic: 1, balance: 1, _id: 0 } });
+        let result = await db.collection('user').findOne({ _id: uid }, { projection: { name: 1, phone:1,head_pic: 1, balance: 1, _id: 1 } });
         if (result) {
             data.info = result;
             return data;
@@ -218,30 +219,41 @@ class UserService extends Service {
         const { ctx, app } = handerThis;
         let db = this.app.mongo.get('GOPAY')['db'];//获取数据库WLWord
         let options;
-        if (type === 1) {
-            options = {
-                projection: {
-                    zhifubao: 1,
-                    _id: 0
-                }
-            }
-        }
-        if (type === 2) {
-            options = {
+        if(type==null){
+            options={
                 projection: {
                     weixin: 1,
+                    zhifubao:1,
+                    bank_card:1,
                     _id: 0
                 }
             }
-        }
-        if (type === 3) {
-            options = {
-                projection: {
-                    bank_card: 1,
-                    _id: 0
+        }else{
+            if (type === 1) {
+                options = {
+                    projection: {
+                        weixin: 1,
+                        _id: 0
+                    }
                 }
             }
-        }
+            if (type === 2) {
+                options = {
+                    projection: {
+                        zhifubao: 1,
+                        _id: 0
+                    }
+                }
+            }
+            if (type === 3) {
+                options = {
+                    projection: {
+                        bank_card: 1,
+                        _id: 0
+                    }
+                }
+            }
+        } 
         let data = await db.collection('user').findOne({ _id: uid }, options);
         if (data) {
             return data;
@@ -259,22 +271,22 @@ class UserService extends Service {
         const { ctx, app } = handerThis;
         let data = {};
         let db = this.app.mongo.get('GOPAY')['db'];//获取数据库WLWord
-        let options;
-        if (type === 1) {
+        let options; 
+        if (type === 1) { //微信
+            options = {
+                $set: {
+                    weixin:info
+                }
+            }
+        }
+        if (type === 2) { //支付宝
             options = {
                 $set: {
                     zhifubao: info,
                 }
             }
         }
-        if (type === 2) {
-            options = {
-                $set: {
-                    weixin: info,
-                }
-            }
-        }
-        if (type === 3) {
+        if (type === 3) { //银行卡
             options = {
                 $set: {
                     bank_card: info,

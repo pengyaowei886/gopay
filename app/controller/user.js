@@ -29,6 +29,9 @@ class UserController extends Controller {
                 },
                 name: {
                     type: 'string', required: true, llowEmpty: false
+                },
+                pay_password: {
+                    type: 'string', required: true, llowEmpty: false
                 }
             }, ctx.request.body);
         } catch (e) {
@@ -47,7 +50,7 @@ class UserController extends Controller {
             let password = ctx.request.body.password;
             let param = ctx.request.body.param;
             let name = ctx.request.body.name;
-            let data = await service.user.register(phone, password, name, param);
+            let data = await service.user.register(phone, password, name, param,pay_password);
             return handerThis.succ(data);
         } catch (error) {
             return handerThis.error('HANDLE_ERROR', error['message']);
@@ -224,7 +227,7 @@ class UserController extends Controller {
             //使用插件进行验证 validate    
             ctx.validate({
                 type: {//字符串 必填 不允许为空字符串 
-                    type: 'string', required: true, allowEmpty: false
+                    type: 'string', required: false, allowEmpty: false
                 },
             }, ctx.request.query);
         } catch (e) {
@@ -239,8 +242,14 @@ class UserController extends Controller {
         try {
             let uid = handerThis.user().uid;
             let type = Number(ctx.request.query.type);
+        if(type){
             let data = await service.user.query_pay_info(uid, type);
             return handerThis.succ(data);
+        }else{
+            let data = await service.user.query_pay_info(uid, null);
+            return handerThis.succ(data);
+        }
+           
         } catch (error) {
             return handerThis.error('HANDLE_ERROR', error['message']);
         }
@@ -261,7 +270,7 @@ class UserController extends Controller {
                 info: {
                     type: 'object', required: true, allowEmpty: false
                 }
-            }, ctx.request.query);
+            }, ctx.request.body);
         } catch (e) {
             ctx.logger.warn(e);
             let logContent = e.code + ' ' + e.message + ',';
@@ -274,8 +283,8 @@ class UserController extends Controller {
         try {
             let uid = handerThis.user().uid;
             let type = ctx.request.body.type;
-            let info = ctx.request.body.type;
-            let data = await service.user.query_pay_info(uid, type, info);
+            let info = ctx.request.body.info;
+            let data = await service.user.save_pay_info(uid, type, info);
             return handerThis.succ(data);
         } catch (error) {
             return handerThis.error('HANDLE_ERROR', error['message']);

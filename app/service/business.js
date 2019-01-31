@@ -15,12 +15,23 @@ class BusinessService extends Service {
             await db.collection('user').updateOne({ _id: uid }, { $inc: { balance: -num } });
             //将订单插入系统交易表
             //获取自增序列
+            let pay_info;
+            if (type === 1) {
+                pay_info = res_money.weixin;
+            }
+            if (type === 2) {
+                pay_info = res_money.zhifubao;
+            }
+            if (type === 3) {
+                pay_info = res_money.bank_card;
+            }
             let seqs = await handerThis.ctx.service.counter.getNextSequenceValue('business', 1);
             let options = {
                 _id: seqs,
                 sell_uid: uid,
                 buy_uid: null,
                 type: type,
+                pay_info: pay_info,
                 money: num,
                 is_succ: 0,//是否卖出
                 ctime: new Date(),
@@ -45,8 +56,8 @@ class BusinessService extends Service {
         }
     }
     /**
- * 用户下架货币
- */
+    * 用户下架货币
+    */
     async delete_coin(uid, id) {
         let handerThis = this;
         const { ctx, app } = handerThis;
@@ -54,17 +65,23 @@ class BusinessService extends Service {
         let data = {};
         //删除总记录
         let result = await db.collection('business').findOne({ _id: id });
-        await db.collection('business').deleteOne({ _id: id });
-        //恢复余额
-        await db.collection('user').updateOne({ _id: id }, { $inc: { balance: result.money } });
-        let options = {
-            $pull: {
-                "sell._id": id
+        if (result) {
+            await db.collection('user').updateOne({ _id: id }, { $inc: { balance: result.money } });
+            await db.collection('business').deleteOne({ _id: id });
+            let options = {
+                $pull: {
+                    sell: {
+                        _id: id, is_read: 0, is_succ: 0
+                    }
+                }
             }
+            //修改用户订单表
+            await db.collection('user_business').updateOne({ _id: uid }, options);
+            return data;
+        } else {
+            throw new Error("该订单不存在")
         }
-        //修改用户订单表
-        await db.collection('user_business').updateOne({ _id: uid }, options);
-        return data;
+
     }
     /**
      * 查看卖币列表
@@ -78,7 +95,8 @@ class BusinessService extends Service {
             projection: {
                 money: 1,
                 type: 1,
-                sell_uid: 1
+                sell_uid: 1,
+                pay_info: 1
             }
         }
         //查询卖币数量，卖币方式
@@ -103,7 +121,10 @@ class BusinessService extends Service {
                             head_pic: info[r].head_pic,
                             money: result[i].money,
                             type: result[i].type,
-                            order_num: order_num[j].order_num
+                            pay_info: result[i].pay_info,
+                            order_num: order_num[j].order_num,
+                            pay_name: result[i].pay_info.name,
+                            pay_url: result[i].pay_info.url
                         })
                         break;
                     }
@@ -125,11 +146,24 @@ class BusinessService extends Service {
             projection: {
                 money: 1,
                 type: 1,
-                sell_uid: 1
+                sell_uid: 1,
+                pay_info: 1
+            }
+        }
+
+        let query = {
+        };
+        if (num == null) {
+            query = {
+                is_succ: 0, type: type
+            }
+        } else {
+            query = {
+                is_succ: 0, type: type, money: num
             }
         }
         //查询卖币数量，卖币方式
-        let result = await db.collection('business').find({ is_succ: 0, type: type, money: num }, option).sort({ ctime: -1 }).toArray();
+        let result = await db.collection('business').find(query, option).sort({ ctime: -1 }).toArray();
         let uid = [];
         for (let i in result) {
             uid.push(result[i].sell_uid);
@@ -145,11 +179,15 @@ class BusinessService extends Service {
                 for (let r in info) {
                     if (result[i].sell_uid === order_num[j]._id && order_num[j]._id === info[r]._id) {
                         data.info.push({
+
                             name: info[r].name,
                             head_pic: info[r].head_pic,
                             money: result[i].money,
                             type: result[i].type,
-                            order_num: order_num[j].order_num
+                            pay_info: result[i].pay_info,
+                            order_num: order_num[j].order_num,
+                            pay_name: result[i].pay_info.name,
+                            pay_url: result[i].pay_info.url
                         })
                         break;
                     }
@@ -207,13 +245,15 @@ class BusinessService extends Service {
         }
 
         let info = await db.collection('business').find({ _id: { $in: id } }, { sort: { utime: 1 } }).toArray();
+
         let new_id = [];
         for (let i in info) {
             new_id.push(info[i].buy_uid);
         }
+
         let user_info = await db.collection('user').find({ _id: { $in: new_id } }, { projection: { name: 1, head_pic: 1 } }).toArray();
-        for (let i in user_info) {
-            for (let j in info) {
+        for (let j in info) {
+            for (let i in user_info) {
                 if (info[j].buy_uid == user_info[i]._id) {
                     data.info.push({
                         name: user_info[i].name,
@@ -222,8 +262,9 @@ class BusinessService extends Service {
                         id: info[j]._id,
                         utime: info[j].utime
                     });
-                    break;
+
                 }
+                break;
             }
         }
         return data;
@@ -246,8 +287,8 @@ class BusinessService extends Service {
         return data;
     }
     /**
-   * 用户查看交易记录
-   */
+    * 用户查看交易记录
+    */
     async query_business(uid, type) {
         let handerThis = this;
         const { ctx, app } = handerThis;
@@ -313,31 +354,63 @@ class BusinessService extends Service {
 
     }
     /**
- * 用户查看未成交卖单信息
- */
-    async query_dissucc_record(uid,type) {
+    * 用户查看未成交卖单信息
+    */
+    async query_dissucc_record(uid, type) {
         let handerThis = this;
         const { ctx, app } = handerThis;
         let db = this.app.mongo.get('GOPAY')['db'];//获取数据库实例 
         let data = {
             info: []
         };
-        let option={
-            sell_uid: uid, 
-            is_succ: 0 ,
-            type:type
+
+        let option = {
+            sell_uid: uid,
+            is_succ: 0,
+            type: type
         }
         let result = await db.collection('business').find(option, {
             projection: {
-                _id: 0,
+                _id: 1,
                 money: 1,
                 type: 1,
                 ctime: 1
             }
         }).toArray();
+
         data.info = result;
         return data;
 
     }
+    /**
+     * 用户请求二维码
+     * 
+     */
+    async sao_business(busi_uid, uid, money,pay_password) {
+        let handerThis = this;
+        const { ctx, app } = handerThis;
+        let db = this.app.mongo.get('GOPAY')['db'];//获取数据库实例 
+        let data = {};
+        let res_money = await db.collection('user').findOne({ _id: uid, pay_password: pay_password });
+
+        if (res_money) {
+            if (res_money.balance >= money) {
+                console.log("jdjh");
+                //扣除自己余额
+                let result_self = await db.collection('user').updateOne({ _id: uid }, { $inc: { balance: -money } });
+                if (result_self.result.nModified === 1) {
+                    //给对方增加余额
+                    let result_he = await db.collection('user').updateOne({ _id: busi_uid }, { $inc: { balance: money } });
+                    if (result_he.result.nModified === 1) {
+                        return data;
+                    }
+                }
+            }
+        } else {
+            throw new Error("验证失败")
+        }
+
+    }
 }
+
 module.exports = BusinessService
