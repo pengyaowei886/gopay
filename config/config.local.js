@@ -8,36 +8,37 @@ module.exports = appInfo => {
   //add your config here
   config.middleware = ['loginVerify'];
 
-//安全验证
+  //安全验证
   config.security = {
     csrf: {
       enable: false
     }
   };
   //请求格式和是否跨域
-    config.cors = {
-      allowMethods: 'GET,POST,PUT,DELETE',
-      credentials: true
-    }
-
-  config.mongo = {
-    clients: {
-      GOPAY: {
-        host: '127.0.0.1',
-        port: '51234',
-        name: 'gopay',
-        user: '',
-        password: '',
-        options: {useNewUrlParser: true},
-      }
-    }
-  };
-   //token加密方式
-  config.GOPAY={
-     key : '9vApxLk5G3PAsJrM', //16位 对称公钥
-     iv : 'FnJL7EDzjqWjcaY9',  //偏移量
+  config.cors = {
+    allowMethods: 'GET,POST,PUT,DELETE',
+    credentials: true
   }
-  config.cluster= {
+  config.mysql = {
+    // 单数据库信息配置
+    client: {
+      // host
+      host: '127.0.0.1',
+      // 端口号
+      port: '3306',
+      // 用户名
+      user: 'root',
+      // 密码
+      password: '159370',
+      // 数据库名
+      database: 'sss'
+    },
+    // 是否加载到 app 上，默认开启
+    app: true,
+    // 是否加载到 agent 上，默认关闭
+    agent: false,
+  };
+  config.cluster = {
     listen: {
       port: 80,
       hostname: '127.0.0.1',
@@ -46,7 +47,10 @@ module.exports = appInfo => {
       //   cert:"D:/worssl/1_xingyumeng.com_bundle.pem"
       //  }
     },
-    
+
+  };
+  config.info = {
+      room_key:"~!@#$(*&^%$&",
   };
 
   return config;

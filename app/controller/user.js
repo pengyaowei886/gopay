@@ -50,7 +50,7 @@ class UserController extends Controller {
             let password = ctx.request.body.password;
             let param = ctx.request.body.param;
             let name = ctx.request.body.name;
-            let data = await service.user.register(phone, password, name, param,pay_password);
+            let data = await service.user.register(phone, password, name, param, pay_password);
             return handerThis.succ(data);
         } catch (error) {
             return handerThis.error('HANDLE_ERROR', error['message']);
@@ -98,12 +98,12 @@ class UserController extends Controller {
         try {
             //使用插件进行验证 validate    
             ctx.validate({
-                phone: {//字符串 必填 不允许为空字符串 
+                account: {//字符串 必填 不允许为空字符串 
                     type: 'string', required: true, allowEmpty: false
                 },
                 password: {//字符串 必填 不允许为空字符串 
                     type: 'string', required: true, allowEmpty: false
-                },
+                }
             }, ctx.request.query);
         } catch (e) {
             ctx.logger.warn(e);
@@ -115,9 +115,9 @@ class UserController extends Controller {
         }
         //逻辑处理
         try {
-            let phone = ctx.request.query.phone;
+            let account = ctx.request.query.account;
             let password = ctx.request.query.password;
-            let data = await service.user.login(phone, password);
+            let data = await service.user.login(account);
             return handerThis.succ(data);
         } catch (error) {
             return handerThis.error('HANDLE_ERROR', error['message']);
@@ -242,14 +242,14 @@ class UserController extends Controller {
         try {
             let uid = handerThis.user().uid;
             let type = Number(ctx.request.query.type);
-        if(type){
-            let data = await service.user.query_pay_info(uid, type);
-            return handerThis.succ(data);
-        }else{
-            let data = await service.user.query_pay_info(uid, null);
-            return handerThis.succ(data);
-        }
-           
+            if (type) {
+                let data = await service.user.query_pay_info(uid, type);
+                return handerThis.succ(data);
+            } else {
+                let data = await service.user.query_pay_info(uid, null);
+                return handerThis.succ(data);
+            }
+
         } catch (error) {
             return handerThis.error('HANDLE_ERROR', error['message']);
         }
