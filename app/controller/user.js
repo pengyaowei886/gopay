@@ -18,20 +18,17 @@ class UserController extends Controller {
         try {
             //使用插件进行验证 validate    
             ctx.validate({
-                phone: {//字符串 必填 不允许为空字符串 ， 小程序使用wx.login得到的 临时登录凭证code,开发者服务器使用,临时登录凭证code获取 session_key和openid
+                account: {
                     type: 'string', required: true, allowEmpty: false
                 },
                 password: {
                     type: 'string', required: true, allowEmpty: false
                 },
-                param: {
-                    type: 'string', required: true, llowEmpty: false
+                headimg: {
+                    type: 'string', required: true, allowEmpty: false
                 },
                 name: {
-                    type: 'string', required: true, llowEmpty: false
-                },
-                pay_password: {
-                    type: 'string', required: true, llowEmpty: false
+                    type: 'string', required: true, allowEmpty: false
                 }
             }, ctx.request.body);
         } catch (e) {
@@ -46,48 +43,18 @@ class UserController extends Controller {
         try {
             let handerThis = this;
             const { ctx, app, service } = handerThis;
-            let phone = ctx.request.body.phone;
+     
+            let account = ctx.request.body.account;
             let password = ctx.request.body.password;
-            let param = ctx.request.body.param;
+            let headimg = ctx.request.body.headimg;
             let name = ctx.request.body.name;
-            let data = await service.user.register(phone, password, name, param, pay_password);
+            let data = await ctx.service.user.register(account, password,name,headimg);
             return handerThis.succ(data);
         } catch (error) {
             return handerThis.error('HANDLE_ERROR', error['message']);
         }
     }
-    /**
-     * 用户注册请求短信验证码
-     * 
-     */
-    async req_dx() {
-        let handerThis = this;
-        const { ctx, app, service } = handerThis;
-        //参数校验
-        try {
-            //使用插件进行验证 validate    
-            ctx.validate({
-                phone: {//字符串 必填 不允许为空字符串 ， 小程序使用wx.login得到的 临时登录凭证code,开发者服务器使用,临时登录凭证code获取 session_key和openid
-                    type: 'string', required: true, allowEmpty: false
-                }
-            }, ctx.request.query);
-        } catch (e) {
-            ctx.logger.warn(e);
-            let logContent = e.code + ' ' + e.message + ',';
-            for (let i in e.errors) {
-                logContent += e.errors[i]['code'] + ' ' + e.errors[i]['field'] + ' ' + e.errors[i]['message'] + ' '
-            }
-            return handerThis.error('PARAMETERS_ERROR', logContent);
-        }
-        //逻辑判断
-        try {
-            let phone = ctx.request.query.phone;
-            let data = await service.user.req_dx(phone);
-            return handerThis.succ(data);
-        } catch (error) {
-            return handerThis.error('HANDLE_ERROR', error['message']);
-        }
-    }
+
     /**
      * 用户登陆
      */
@@ -117,7 +84,10 @@ class UserController extends Controller {
         try {
             let account = ctx.request.query.account;
             let password = ctx.request.query.password;
-            let data = await service.user.login(account);
+            let host=ctx.request.host;
+            let ip=host.split(':')[0];
+          
+            let data = await service.user.login(account,password,ip);
             return handerThis.succ(data);
         } catch (error) {
             return handerThis.error('HANDLE_ERROR', error['message']);

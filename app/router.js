@@ -15,16 +15,20 @@ module.exports = app => {
 
   //用户登陆
   router.get('/login', controller.user.login);
-  
- /****************** 十三水 http *************** *************/
- router.post('/sss/room/create', controller.sss.create_room);
-
-/****************** 十三水 socket*************** *************/
-  //十三水socket
-  io.of('/sss').route('login', io.controller.sss.login);
 
 
-  //德州扑克socket
-  io.of('/dzpk').route('connection', io.controller.dzpk.server);
+  /****************** 十三水 http *************** *************/
+  //创建房间
+  router.post('/sss/room/create', controller.sss.create_room);
+
+  //进入房间
+  router.post('/sss/room/join', controller.sss.join_room);
+  /****************** 十三水 socket*************** *************/
+  // //十三水socket
+  // io.of('/sss').route('login', io.controller.sss.login);
+
+
+  // //德州扑克socket
+  // io.of('/dzpk').route('connection', io.controller.dzpk.server);
 
 }
