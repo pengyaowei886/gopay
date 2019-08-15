@@ -64,7 +64,6 @@ class UserService extends Service {
     async login(account, password,ip) {
         let handerThis = this;
         const { ctx, app } = handerThis;
-
         let status = await this.ctx.service.userSql.user_login(account, password);
         if (status) {
             let data = await this.ctx.service.userSql.get_user_data_by_account(account);

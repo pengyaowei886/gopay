@@ -24,9 +24,12 @@ module.exports = app => {
   //进入房间
   router.post('/sss/room/join', controller.sss.join_room);
   /****************** 十三水 socket*************** *************/
-  // //十三水socket
-  // io.of('/sss').route('login', io.controller.sss.login);
-
+  //登陆
+  io.of('/sss').route('login', io.controller.sss.login);
+  //游戏准备
+  io.of('/sss').route('ready', io.controller.sss.ready);
+  //回到大厅
+  io.of('/sss').route('ready', io.controller.sss.back_to_hall)
 
   // //德州扑克socket
   // io.of('/dzpk').route('connection', io.controller.dzpk.server);

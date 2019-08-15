@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Socket????</title>
+</head>
+
+<body>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/socket.io/2.1.1/socket.io.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            var data = {
+                roomid: "285074",
+                userid: 41
+            }
+            var socket = io("ws://127.0.0.1:7001/sss");  //ip
+            console.log(socket);
+            console.log(socket.connected);
+            console.log(socket.disconnected);
+            if (socket.disconnected) {
+
+                socket.emit("login", data);
+                socket.on("login_result", function (res) {
+                    console.log(res);
+
+                });
+                socket.on("new_user_comes_push", function (res) {
+                    console.log("new user comming....")
+                    console.log(res);
+
+                });
+            } else {
+                console.log("?????wocao ")
+            }
+        })
+    </script>
+</body>
+
+</html

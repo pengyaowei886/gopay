@@ -38,6 +38,21 @@ module.exports = appInfo => {
     // 是否加载到 agent 上，默认关闭
     agent: false,
   };
+
+
+  config.io = {
+    init: {}, // passed to engine.io
+    namespace: {
+      '/sss': {
+        connectionMiddleware: ['conn'],
+        packetMiddleware: [],
+      },
+      '/dzpk': {
+        connectionMiddleware: [],
+        packetMiddleware: [],
+      },
+    },
+  };
   config.cluster = {
     listen: {
       port: 7001,
@@ -50,7 +65,7 @@ module.exports = appInfo => {
 
   };
   config.info = {
-      room_key:"~!@#$(*&^%$&",
+    room_key: "~!@#$(*&^%$&",
   };
 
   return config;

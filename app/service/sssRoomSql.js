@@ -21,7 +21,8 @@ class SssRoomSqlService extends Service {
         let uuid = new Date().getTime() + params.roomid;
         let room = await mysql.insert('t_sss_rooms', {
             uuid: uuid, id: params.roomid, peo_num: params.peo_num, ctime: new Date().getTime(), ju_num: params.ju_num, fangfei_type: params.fangfei_type,
-            moshi: params.moshi, is_mapai: params.is_mapai, type: params.type, need_gems: params.need_gems, fangzhu_gems: params.fangzhu_gems, cuid: params.userid, turn: 0
+            moshi: params.moshi, is_mapai: params.is_mapai, type: params.type, need_gems: params.need_gems, fangzhu_gems: params.fangzhu_gems, cuid: params.userid, turn: 0,
+            status:1
         });
         if (room.affectedRows == 1) {
             return true;
@@ -30,11 +31,15 @@ class SssRoomSqlService extends Service {
         }
     }
     //安排用户坐下
-    async set_user_seat(userid, roomId, seatIndex, type) {
+    async set_user_seat(userid, roomId, seatIndex, type,) {
         const mysql = this.app.mysql;
         if (this.room_is_exist(roomId)) {
+            let host= this.ctx.request.host;
+            let ip=host.split(":")[0];
+            let user_info= await this.ctx.service.userSql.get_user_data_by_id(userid);
+            console.log(user_info)
             let res = await mysql.insert('t_user_join_room', {
-                userid: userid, roomid: roomId, seat_index: seatIndex, type: type, ctime: new Date().getTime()
+                userid: userid, roomid: roomId, seat_index: seatIndex, type: type, ctime: new Date().getTime(),online:1,score:0,ready:0,ip:ip,name:user_info.name,headimg:user_info.headimg
             })
             if (res.affectedRows == 1) {
                 return true;
@@ -69,7 +74,6 @@ class SssRoomSqlService extends Service {
     //获取坐位配置信息
     async get_seat_data(roomId) {
         const mysql = this.app.mysql;
-
         let res = await mysql.select('t_user_join_room', { where: { roomid: roomId } });
         return res
     }
@@ -82,6 +86,26 @@ class SssRoomSqlService extends Service {
             return true
         } else {
             return false
+        }
+    }
+    //获取坐位配置信息
+    async del_user_seat(userid) {
+        const mysql = this.app.mysql;
+        let res = await mysql.select('t_user_join_room', { where: { userid: userid } });
+        if (res.affectedRows == 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    //修改用户游戏状态
+    async update_user_status(userid, status) {
+        const mysql = this.app.mysql;
+        let res = await mysql.select('t_user_join_room', { status: status }, { where: { userid: userid } });
+        if (res.affectedRows == 1) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
