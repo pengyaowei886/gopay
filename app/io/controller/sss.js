@@ -1,17 +1,50 @@
 const Controller = require('egg').Controller;
-const md5 = require('md5');
+
 
 class SssController extends Controller {
-    //用户登录
-    async login() {
+
+
+    async join() {
         const { ctx, app } = this;
+
 
         const data = ctx.args[0];
 
         // let room_key = app.config.info.room_key;
         let userid = data.userid;
         let roomId = data.roomid;
+        let socket = ctx.socket;
         // let sign = data.sign;
+
+
+       
+
+        socket.join(roomId, () => {
+            let socketroom = app.io.of("/sss").adapter.rooms[roomId];
+            console.log(socketroom);
+            socket.broadcast.to(roomId).emit('new_user_comes_push', "xixi"); // 通知所有 包括自己
+        })
+    }
+
+
+
+    //await app.io.of("/sss").emit('new_user_comes_push', "xixi"); //通知所有 包括自己
+    // await socket.to(roomId).emit('new_user_comes_push', userData); //不通知
+
+
+
+
+    //用户登录
+    async login() {
+        const { ctx, app } = this;
+
+        // const data = ctx.args[0];
+
+        // // let room_key = app.config.info.room_key;
+        // let userid = data.userid;
+        // let roomId = data.roomid;
+        // let sign = data.sign;
+
         let socket = this.ctx.socket;
         // console.log(roomId);
         // console.log(userid);
@@ -36,13 +69,12 @@ class SssController extends Controller {
             socket.id = userid;
             console.log(socket.id)
             //进入房间
-            socket.join(roomId, () => {
+            await socket.join(roomId, () => {
                 console.log(socket.rooms);
             })
 
             let seat_info = await this.ctx.service.sssRoomSql.get_seat_data(roomId);
             let room_info = await this.ctx.service.sssRoomSql.get_room_data(roomId);
-
             let userData = null;
             let seats = [];
             for (var i = 0; i < seat_info.length; i++) {
@@ -75,10 +107,26 @@ class SssController extends Controller {
 
             await socket.emit('login_result', ret);
             //通知当前房间其它客户端
-            console.log(socket.rooms)
-          let a = await socket.broadcast.to(roomId).emit('new_user_comes_push', userData)
-          console.log(a)
+            let socketroom = app.io.of("/sss").adapter.rooms[roomId];
+            console.log(socketroom)
+
+            // await socket.broadcast.emit('new_user_comes_push', userData);
+            //  let arr= Object.keys(socketroom.sockets)
+            //  for(let i in arr){
+            //      if(socket.id==arr[i]){ //自己不广播
+            //      }else{
+            //          console.log("要广播了，速速后退")
+            //            console.log(`${arr[i]}`)
+            //          await socket.to(`${arr[i]}`).emit('new_user_comes_push', userData);
+            //          //await app.io.to(arr[i]).emit('new_user_comes_push', userData);
+            //      }
+            //  }
+            //await socket.broadcast.emit('new_user_comes_push', userData); // 通知所有 包括自己
+            await app.io.of("/sss").emit('new_user_comes_push', userData); //通知所有 包括自己
+            // await socket.to(roomId).emit('new_user_comes_push', userData); //不通知
+            // await socket.disconnect();
         } else {
+
             let ret = {
                 errcode: 2,
                 errmsg: "room is not exist"
@@ -93,7 +141,7 @@ class SssController extends Controller {
         //清除座位信息
         await this.ctx.service.userSql.delete_user_seat(userid);
         //断开socket
-        await this.ctx.socket.disconnet();
+        await this.ctx.socket.disconnect(true);
     }
     //游戏准备
     async ready() {

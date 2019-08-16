@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>???2</title>
+    <title>???3</title>
 </head>
 
 <body>
@@ -13,10 +13,11 @@
         $(function () {
 
             var data = {
-                roomid: "285074",
-                userid: 41
+                roomid: "259562",
+                userid: 42
             }
             var socket = io("ws://127.0.0.1:7001/sss");  //ip
+      
             if (socket.disconnected) {
 
                 socket.emit("join", data);

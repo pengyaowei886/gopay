@@ -6,11 +6,11 @@ class UserSqlService extends Service {
     //用户注册
     async create_user(account, password, name, headimg) {
         const mysql = this.app.mysql;
-        let jiamiacc = Buffer(account).toString('base64');
+        let jiamiacc = Buffer.from(account).toString('base64');
         let user = await mysql.select('t_users', { where: { account: jiamiacc } });
         if (user.length == 0) {
-            let jiaminame = Buffer(name).toString('base64');
-            let jiamipsw = Buffer(password).toString('base64');
+            let jiaminame = Buffer.from(name).toString('base64');
+            let jiamipsw = Buffer.from(password).toString('base64');
             let result = await mysql.insert('t_users', {
                 account: jiamiacc,
                 name: jiaminame,
@@ -44,7 +44,7 @@ class UserSqlService extends Service {
     async update_user_info(userid, name, sex, headimg) {
         const mysql = this.app.mysql;
         if (this.user_is_exist(userid)) {
-            let jiaminame = Buffer(name).toString('base64');
+            let jiaminame = Buffer.from(name).toString('base64');
             let result = await mysql.update('user', {
                 userid: userid,
                 name: jiaminame,

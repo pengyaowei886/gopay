@@ -7,7 +7,7 @@ class SssSqlService extends Service {
     //创建房间
     async create_room(params) {
         let roomid = this.service.tools.generateRoomId();
-
+        console.log(roomid)
         params.roomid = roomid;
         if (params.fangfei_type == 1) { // 付费选择 1 房主自费 2 aa
             let res = await this.service.userSql.get_user_data_by_id(params.userid);

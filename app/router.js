@@ -26,10 +26,12 @@ module.exports = app => {
   /****************** 十三水 socket*************** *************/
   //登陆
   io.of('/sss').route('login', io.controller.sss.login);
+  //登陆
+  io.of('/sss').route('join', io.controller.sss.join);
   //游戏准备
   io.of('/sss').route('ready', io.controller.sss.ready);
   //回到大厅
-  io.of('/sss').route('ready', io.controller.sss.back_to_hall)
+  io.of('/sss').route('back_to_hall', io.controller.sss.back_to_hall)
 
   // //德州扑克socket
   // io.of('/dzpk').route('connection', io.controller.dzpk.server);

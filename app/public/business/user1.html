@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Socket????</title>
+    <title>客户端1</title>
 </head>
 
 <body>
@@ -19,7 +19,7 @@
             var socket = io("ws://127.0.0.1:7001/sss");  //ip
             if (socket.disconnected) {
 
-                socket.emit("login", data);
+                socket.emit("join", data);
                 socket.on("login_result", function (res) {
                     console.log(res);
 

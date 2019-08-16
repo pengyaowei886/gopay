@@ -74,7 +74,7 @@ class UserService extends Service {
                 coins: data.coins,
                 gems: data.gems,
                 ip: ip,
-                sex: data.sex,
+                sex: data.sex
             };
             //判断用户是否有对局
             let user_seat_exist = await this.ctx.service.userSql.get_user_seat(data.userid);
