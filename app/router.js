@@ -33,7 +33,6 @@ module.exports = app => {
   io.of('/sss').route('start', io.controller.sss.start);
   //比牌
   io.of('/sss').route('compare', io.controller.sss.compare);
-
   //回到大厅
   io.of('/sss').route('back_to_hall', io.controller.sss.back_to_hall)
 

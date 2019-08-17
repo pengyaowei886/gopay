@@ -137,6 +137,9 @@ class SssController extends Controller {
     // 比牌
     async compare() {
 
+        let socket = this.ctx.socket;
+        
+
     }
 
 }
