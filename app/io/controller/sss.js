@@ -4,7 +4,7 @@ const Controller = require('egg').Controller;
 class SssController extends Controller {
 
 
-    async join() {
+    async login() {
         const { ctx, app } = this;
 
 
@@ -14,65 +14,12 @@ class SssController extends Controller {
         let userid = data.userid;
         let roomId = data.roomid;
         let socket = ctx.socket;
-        // let sign = data.sign;
-
-
-       
-
-        socket.join(roomId, () => {
-            let socketroom = app.io.of("/sss").adapter.rooms[roomId];
-            console.log(socketroom);
-            socket.broadcast.to(roomId).emit('new_user_comes_push', "xixi"); // 通知所有 包括自己
-        })
-    }
-
-
-
-    //await app.io.of("/sss").emit('new_user_comes_push', "xixi"); //通知所有 包括自己
-    // await socket.to(roomId).emit('new_user_comes_push', userData); //不通知
-
-
-
-
-    //用户登录
-    async login() {
-        const { ctx, app } = this;
-
-        // const data = ctx.args[0];
-
-        // // let room_key = app.config.info.room_key;
-        // let userid = data.userid;
-        // let roomId = data.roomid;
-        // let sign = data.sign;
-
-        let socket = this.ctx.socket;
-        // console.log(roomId);
-        // console.log(userid);
-        // console.log(sign);
-        // //检验参数合法性
-        // if (token == null || roomId == null || sign == null) {
-        //     console.log(1);
-        //     await ctx.socket.emit('login_result', { errcode: 1, errmsg: "invalid parameters" });
-        //     return;
-        // }
-        // //检查参数是否被篡改
-        // let md5_sign = md5(roomId + userid + room_key);
-        // if (md5_sign != sign) {
-        //     console.log(2);
-        //     socket.emit('login_result', { errcode: 2, errmsg: "login failed. invalid sign!" });
-        //     return;
-        // };
-
+        //给socket赋值
+        socket.userid = userid;
+        socket.roomid = roomId;
         let room_is_exist = await this.ctx.service.sssRoomSql.room_is_exist(roomId);
         //给socket 赋值
         if (room_is_exist) {
-            socket.id = userid;
-            console.log(socket.id)
-            //进入房间
-            await socket.join(roomId, () => {
-                console.log(socket.rooms);
-            })
-
             let seat_info = await this.ctx.service.sssRoomSql.get_seat_data(roomId);
             let room_info = await this.ctx.service.sssRoomSql.get_room_data(roomId);
             let userData = null;
@@ -105,58 +52,93 @@ class SssController extends Controller {
                 }
             };
 
-            await socket.emit('login_result', ret);
-            //通知当前房间其它客户端
-            let socketroom = app.io.of("/sss").adapter.rooms[roomId];
-            console.log(socketroom)
-
-            // await socket.broadcast.emit('new_user_comes_push', userData);
-            //  let arr= Object.keys(socketroom.sockets)
-            //  for(let i in arr){
-            //      if(socket.id==arr[i]){ //自己不广播
-            //      }else{
-            //          console.log("要广播了，速速后退")
-            //            console.log(`${arr[i]}`)
-            //          await socket.to(`${arr[i]}`).emit('new_user_comes_push', userData);
-            //          //await app.io.to(arr[i]).emit('new_user_comes_push', userData);
-            //      }
-            //  }
-            //await socket.broadcast.emit('new_user_comes_push', userData); // 通知所有 包括自己
-            await app.io.of("/sss").emit('new_user_comes_push', userData); //通知所有 包括自己
-            // await socket.to(roomId).emit('new_user_comes_push', userData); //不通知
-            // await socket.disconnect();
+            socket.join(roomId, () => {
+                // let socketroom = app.io.of("/sss").adapter.rooms[roomId];
+                // console.log(socketroom);
+                //通知当前客户端
+                socket.emit('login_result', ret);
+                //通知当前房间其它客户端
+                socket.broadcast.to(roomId).emit('new_user_comes_push', userData);
+            })
         } else {
-
             let ret = {
                 errcode: 2,
                 errmsg: "room is not exist"
             };
             await socket.emit('login_result', ret);
         }
-
     }
+
     //回到大厅
     async 	back_to_hall() {
-        let userid = this.ctx.socket.id;
-        //清除座位信息
+
+        let userid = this.ctx.socket.userid;
+        // 清除座位信息
         await this.ctx.service.userSql.delete_user_seat(userid);
-        //断开socket
+        // 断开socket
         await this.ctx.socket.disconnect(true);
     }
     //游戏准备
     async ready() {
 
         // const data = this.ctx.args[0];
-        let roomid = this.ctx.socket.rooms.room;
-        let userid = this.ctx.socket.id;
+
+        let socket = this.ctx.socket;
+        let userid = socket.userid;
+        let roomid = socket.roomid;
         // 判断是否可以准备
         let room_info = await this.ctx.service.sssRoomSql.get_room_data(roomid);
-        if (room_info.status == 0) { //游戏进行中 不能准备
+        //游戏进行中 或者 局数已经打完不能准备
+        if (room_info.status == 2 || room_info.ju_num == room_info.turn) {
             return
         } else {
+            //更新用户游戏状态
             await this.ctx.service.sssRoomSql.update_user_status(userid, 1);
+            //广播给其他客户端
+            socket.broadcast.to(roomid).emit('user_ready_push', { userid: userid, ready: true });
+            //判断该用户准备能否开始游戏
+            let can_run = this.ctx.service.sssRoomSql.game_can_running(roomid);
+            if (can_run) {
+                //通知房间内所有用户游戏可以开始
+                socket.to(roomid).emit('game_can_run', { userid: userid });
+            }
         }
     }
+    //游戏开始
+    async start() {
+        let socket = this.ctx.socket;
+        let roomid = socket.roomid;
+        let userid = socket.userid;
+        //获取本房间玩法信息
+        let room_info = await this.ctx.service.sssRoomSql.get_room_data(roomid);
+        //获取座位信息
+        let seat_info = await this.ctx.service.sssRoomSql.get_seat_data(roomid);
+        //洗牌
+        let cardtool = await this.ctx.service.sssGame.xipai(room_info);
+        //发牌
+        let user_card = await this.ctx.service.sssGame.fapai(cardtool, seat_info);
+        let data = [];
+        let self_data;
+        for (let i in user_card) {
+            if (user_card[i].userid != userid) {
+                data.push({
+                    userid: user_card[i].userid,
+                    card: user_card[i].card
+                })
+            } else {
+                self_data = user_card[i].card
+            }
+        }
+        //其他人的牌
+        socket.broadcast.to(roomid).emit('other_card', data);
+        //自己的牌
+        socket.emit('self_card', self_data);
+    }
+    // 比牌
+    async compare() {
+
+    }
+
 }
 
 

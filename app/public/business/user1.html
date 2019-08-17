@@ -17,19 +17,28 @@
                 userid: 37
             }
             var socket = io("ws://127.0.0.1:7001/sss");  //ip
-            if (socket.disconnected) {
-
-                socket.emit("join", data);
+            if (socket.disconnected) { //最大bug 断开既连接，连接既断开
+                socket.emit("login", data);
                 socket.on("login_result", function (res) {
                     console.log(res);
-
+                    socket.emit("ready");
+                });
+                socket.on("game_can_run", function (res) {
+                    console.log("game can  run....")
+                    socket.emit("start");
+                    console.log(res);
                 });
                 socket.on("new_user_comes_push", function (res) {
                     console.log("new user comming....")
                     console.log(res);
                 });
+                socket.on("user_ready_push", function (res) {
+                    console.log("user_ready_push....")
+                    console.log(res);
+                });
             } else {
-                console.log("?????wocao ")
+                 //虚假的连接，其实是断开
+                console.log("wocao......") 
             }
         })
     </script>

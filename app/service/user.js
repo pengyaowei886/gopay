@@ -61,7 +61,7 @@ class UserService extends Service {
      * 用户登陆
      *
      */
-    async login(account, password,ip) {
+    async login(account, password, ip) {
         let handerThis = this;
         const { ctx, app } = handerThis;
         let status = await this.ctx.service.userSql.user_login(account, password);
@@ -84,12 +84,8 @@ class UserService extends Service {
                     ret.roomid = user_seat_exist;
                     return ret
                 } else {
-                    let del = await this.ctx.service.userSql.delete_user_seat(data.userid);
-                    if (del) {
-                        return ret;
-                    } else {
-                        throw new Error("删除座位信息失败")
-                    }
+                    await this.ctx.service.userSql.delete_user_seat(data.userid);
+                    return ret;
                 }
             } else {
                 return ret;
@@ -104,16 +100,7 @@ class UserService extends Service {
     async update_user_info(userid, name, headimg, sex) {
 
         await this.ctx.service.user_sql.update_user_info(userid, name, sex, headimg);
-        return null;
+        return {};
     }
-
-    /**
-    * 查询用户基本信息
-    * 
-    */
-    async query_user_info(uid) {
-
-    }
-
 }
 module.exports = UserService;
