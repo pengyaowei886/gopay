@@ -88,12 +88,12 @@ class SssController extends Controller {
         let roomid = socket.roomid;
         // 判断是否可以准备
         let room_info = await this.ctx.service.sssRoomSql.get_room_data(roomid);
-        //游戏进行中 或者 局数已经打完不能准备
-        if (room_info.status == 2 || room_info.ju_num == room_info.turn) {
-            return
-        } else {
+        //游戏对局数没用完而且处于待准备状态
+        if (room_info.status != 2 && room_info.ju_num != room_info.turn) {
             //更新用户游戏状态
             await this.ctx.service.sssRoomSql.update_user_status(userid, 1);
+            //更改房间状态
+            await this.ctx.service.sssRoomSql.update_room_status(roomid, 1);
             //广播给其他客户端
             socket.broadcast.to(roomid).emit('user_ready_push', { userid: userid, ready: true });
             //判断该用户准备能否开始游戏
@@ -102,6 +102,8 @@ class SssController extends Controller {
                 //通知房间内所有用户游戏可以开始
                 socket.to(roomid).emit('game_can_run', { userid: userid });
             }
+        } else {
+            return
         }
     }
     //游戏开始
@@ -129,16 +131,58 @@ class SssController extends Controller {
                 self_data = user_card[i].card
             }
         }
+        //将每个人的牌存入数据库
+        await this.ctx.service.sssRoomSql.update_user_pai(user_card, roomid);
+        //更改房间状态
+        await this.ctx.service.sssRoomSql.update_room_status(roomid, 2);
         //其他人的牌
         socket.broadcast.to(roomid).emit('other_card', data);
         //自己的牌
         socket.emit('self_card', self_data);
     }
+
+    //比牌准备
+    async compare_ready() {
+
+        let socket = this.ctx.socket;
+        let userid = socket.userid;
+        let roomid = socket.roomid;
+
+        const cardtool = this.ctx.args[0];
+
+     
+        // 查询房间游戏状态
+        let room_info = await this.ctx.service.sssRoomSql.get_room_data(roomid);
+        //游戏进行中
+        if (room_info.status == 2) {
+            let card_true = await this.ctx.service.sssRoomSql.user_card_true(userid, cardtool)
+            //判断用户的牌是否被更改
+            if (card_true) {
+                //将用户牌存入数据库
+                await this.ctx.service.sssRoomSql.save_user_card(userid, cardtool);
+                //更新用户游戏状态
+                await this.ctx.service.sssRoomSql.update_user_status(userid, 2);
+                //广播给其他客户端（牌已经配好）
+                socket.broadcast.to(roomid).emit('user_pai_ready_push', { userid: userid, ready: true });
+                //判断该用户准备能否开始比牌
+                let can_run = await this.ctx.service.sssRoomSql.game_can_compare(roomid);
+                if (can_run) {
+                    //通知房间内所有用户可以开牌
+                    socket.to(roomid).emit('game_pai_can_compare', { userid: userid });
+                }
+            }
+        } else {
+            return
+        }
+    }
+
     // 比牌
     async compare() {
 
-        let socket = this.ctx.socket;
-        
+        const socket = this.ctx.socket;
+        //一键组牌
+        socket.on("analysePai")
+
 
     }
 

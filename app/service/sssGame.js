@@ -6,10 +6,10 @@ class SssGameService extends Service {
 
 
 
-  
-    
-     
-    
+
+
+
+
 
     //洗牌
     async xipai(info) {
@@ -59,7 +59,7 @@ class SssGameService extends Service {
         //         userid: 37
         //     }, { userid: 41 }]
         // }
-        console.log(info.length)
+
         for (let i = 0; i < info.length; i++) {
             info[i].card = cardtool.slice(13 * i, 13 * (i + 1));
         }
@@ -148,7 +148,8 @@ class SssGameService extends Service {
         return 0;
     };
     //获取牌类型
-    getType = function (arrPai) {
+    getType(arrPai) {
+
         var isSTST = function (tongPai) {
             for (var i = 0; i < tongPai.length; i++) {
                 if (tongPai[i].count !== 3) {
@@ -370,10 +371,297 @@ class SssGameService extends Service {
         }
         return type;
     };
+    //分析牌
+    analysePai(arrPai) {
+        var len = arrPai.length;
+        var data = {};
+        data.sanPai = [];
+        data.tongPai = [];
+        //同牌信息统计
+        var index = 0;
+        var count = 1;
+        for (var i = 0; i < len; ++i) {
+            if (i >= len - 1) {
+                if (count > 1) {
+                    var tongPaiTmp = {};
+                    tongPaiTmp.value = arrPai[index].value;
+                    tongPaiTmp.count = count;
+                    data.tongPai.push(tongPaiTmp);
+                }
+                break;
+            }
+            if (arrPai[index].value === arrPai[i + 1].value) {
+                ++count;
+            }
+            else {
+                if (count > 1) {
+                    var tongPaiTmp = {};
+                    tongPaiTmp.value = arrPai[index].value;
+                    tongPaiTmp.count = count;
+                    data.tongPai.push(tongPaiTmp);
+                }
+                index = i + 1;
+                count = 1;
+            }
+        }
+        //散牌
+        for (var i = 0; i < len; ++i) {
+            var tLen = data.tongPai.length;
+            var bTongPai = false;
+            for (var j = 0; j < tLen; ++j) {
+                if (arrPai[i].value === data.tongPai[j].value) {
+                    bTongPai = true;
+                    break;
+                }
+            }
+            if (!bTongPai) {
+                data.sanPai.push(arrPai[i]);
+            }
+        }
+
+        return data;
+    }
+
+    comparDX(value1, value2) {
+        if (value1 > value2) {
+            return 1;
+        }
+        else if (value1 === value2) {
+            return 0;
+        }
+        else {
+            return -1;
+        }
+    }
+    //是否乌龙
+    is_wl(pai) {
+        if (pai.length == 3) {
+            for (var i = 0; i < 2; i++) {
+                if (a[i].value != a[i + 1].value) {
+
+                } else {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+    //是否一对子
+    is_ydz(pai) {
+        if (pai.length == 3) {
+            for (var i = 0; i < 2; i++) {
+                if (pai[i].value == pai[i + 1].value) {
+                    return false;
+                }
+            }
+            return false;
+        }
+        if (pai.length == 5) {
+            for (var i = 0; i < 4; i++) {
+                if (pai[i].value == pai[i + 1].value) {
+                    return false;
+                }
+            }
+            return false;
+        }
+    }
+    //是否两对子
+    is_ldz(pai) {
+
+        let count = 0
+        for (var i = 0; i < 4; i++) {
+            if (pai[i].value == pai[i + 1].value) {
+                count++
+            }
+        }
+        if (count == 2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    //是否三条
+    is_st(pai) {
+        if (pai.length == 3) {
+            if (pai[0].value == pai[1].value == pai[2].value) {
+                return true
+            } else {
+                return false;
+            }
+        }
+        if (pai.length == 5) {
+            let count = 0;
+            for (var i = 0; i < 4; i++) {
+                if (pai[i].value == pai[i + 1].value) {
+                    count++
+                }
+            }
+            if (count == 2) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+    //是否同花
+    is_th(pai) {
+        if (pai.length == 3) {
+            if (pai[0].type == pai[1].type == pai[2].type) {
+                return true
+            } else {
+                return false;
+            }
+        }
+        if (pai.length == 5) {
+            for (var i = 0; i < 4; i++) {
+                if (pai[i].type != pai[i + 1].type) {
+                    return false;
+                }
+                return true;
+            }
+        }
+    }
+    //是否葫芦(既是三条又是两对)
+    is_hl(pai) {
+
+        if (this.is_st(pai) && this.is_ldz(pai)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    //是否顺子
+    is_sz(pai) {
+        for (var i = 0; i < 4; i++) {
+            if (pai[i].value + 1 != pai[i + 1].value) {
+                return false;
+            }
+            return true;
+        }
+    }
+    //是否铁支
+    is_sz(pai) {
+        if (pai[0].value == pai[1].value == pai[2].value == pai[3].value || pai[1].value == pai[2].value == pai[3].value == pai[4].value) {
+            return true
+        } else {
+            return false;
+        }
+    }
+    //是否同花顺
+    is_ths(pai) {
+        if (this.is_sz(pai) && this.is_th(pai)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    //是否五同
+    is_ths(pai) {
+        if (pai[0].value == pai[1].value == pai[2].value == pai[3].value == pai[4].value && this.is_sz(pai)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    //获取牌类型
+    get_pai_type(pai) {
+        let count = 0;
+        if (pai.length == 3) {
+            if (this.is_ths()) {
+                count = 5
+                return count;
+            } else if (this.is_th()) {
+                count = 4
+                return count;
+            } else if (this.is_sz()) {
+                count = 3
+                return count;
+            }
+            else if (this.is_st()) {
+                count = 2
+                return count;
+            }
+            else if (this.is_ldz()) {
+                count = 1
+                return count;
+            } else if (this.is_wl()) {
+                count = 1
+                return count;
+            } else {
+                throw new Error("牌类型有问题")
+            }
+        } else if (pai.length == 5) {
+            if (this.is_wt()) {
+                count = 10
+                return count;
+            } else if (this.is_ths()) {
+                count = 9
+                return count;
+            } else if (this.is_tz()) {
+                count = 8
+                return count;
+            } else if (this.is_hl()) {
+                count = 7
+                return count;
+            }
+            else if (this.is_th()) {
+                count = 6
+                return count;
+            }
+            else if (this.is_sz()) {
+                count = 5
+                return count;
+            }
+            else if (this.is_st()) {
+                count = 4
+                return count;
+            }
+            else if (this.is_ldz()) {
+                count = 3
+                return count;
+            }
+            else if (this.is_ydz()) {
+                count = 2
+                return count;
+            } else if (this.is_wl()) {
+                count = 1
+                return count;
+            }
+            else {
+                throw new Error("牌类型有问题")
+            }
+        }
+
+    }
+    //单牌比大小
+    compare_danpai(pai1, pai2) {
+        for (let i = pai1.length; i >= 0; i--) {
+            for (let j = pai2.length; j >= 0; j--) {
+                if (i == j) {
+                    if (pai1[i].value > pai2[j].value) {
+                        return 1
+                    }
+                    if (pai1[i].value < pai2[j].value) {
+                        return -1
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+    //花色比大小
+    compare_huase(type1, type2) {
+        if (type1 < type2) {
+            return 1;
+        } else if (type1 == type2) {
+            return 0;
+        } else {
+            return -1
+        }
+    }
 
     //比牌 并计算积分
-    async compare(user_cards) {
-
+    compare(user_cards) {
         for (let i in user_cards) {
             for (let j in user_cards) {
                 //自己的牌不比较
@@ -381,10 +669,72 @@ class SssGameService extends Service {
                     continue;
                 } else {
                     //比较头墩
-
+                    let pai1 = this.get_pai_type(user_cards[i].td);
+                    let pai1 = this.get_pai_type(user_cards[j].td);
+                    user_cards[i].td_socre = 0;
+                    if (pai1 > pai2) {
+                        user_cards[i].td_socre++
+                    } else if (pai1 == pai2) {
+                        if (this.compare_danpai(user_cards[i].td, user_cards[j].td) == 1) {
+                            user_cards[i].td_socre++
+                        } else if (this.compare_danpai(user_cards[i].td, user_cards[j].td) == -1) {
+                            user_cards[i].td_socre--
+                        } else {
+                            if (this.compare_huase(user_cards[i].td[0].type, user_cards[j].td[0].type) == 1) {
+                                user_cards[i].td_socre++
+                            } else if (this.compare_huase(user_cards[i].td[0].typeuser_cards[j].td[0].type) == -1) {
+                                user_cards[i].td_socre--
+                            }
+                        }
+                    } else {
+                        user_cards[i].td_socre--
+                    }
+                    //比较中墩
+                    let pai3 = this.get_pai_type(user_cards[i].td);
+                    let pai4 = this.get_pai_type(user_cards[j].td);
+                    user_cards[i].zd_socre = 0;
+                    if (pai3 > pai4) {
+                        user_cards[i].zd_socre++
+                    } else if (pai3 == pai4) {
+                        if (this.compare_danpai(user_cards[i].td, user_cards[j].td) == 1) {
+                            user_cards[i].zd_socre++
+                        } else if (this.compare_danpai(user_cards[i].td, user_cards[j].td) == -1) {
+                            user_cards[i].zd_socre--
+                        } else {
+                            if (this.compare_huase(user_cards[i].td[0].type, user_cards[j].td[0].type) == 1) {
+                                user_cards[i].zd_socre++
+                            } else if (this.compare_huase(user_cards[i].td[0].typeuser_cards[j].td[0].type) == -1) {
+                                user_cards[i].zd_socre--
+                            }
+                        }
+                    } else {
+                        user_cards[i].zd_socre--
+                    }
+                    //比较尾墩
+                    let pai5 = this.get_pai_type(user_cards[i].td);
+                    let pai6 = this.get_pai_type(user_cards[j].td);
+                    user_cards[i].wd_socre = 0;
+                    if (pai5 > pai6) {
+                        user_cards[i].wd_socre++
+                    } else if (pai5 == pai6) {
+                        if (this.compare_danpai(user_cards[i].td, user_cards[j].td) == 1) {
+                            user_cards[i].wd_socre++
+                        } else if (this.compare_danpai(user_cards[i].td, user_cards[j].td) == -1) {
+                            user_cards[i].wd_socre--
+                        } else {
+                            if (this.compare_huase(user_cards[i].td[0].type, user_cards[j].td[0].type) == 1) {
+                                user_cards[i].wd_socre++
+                            } else if (this.compare_huase(user_cards[i].td[0].typeuser_cards[j].td[0].type) == -1) {
+                                user_cards[i].wd_socre--
+                            }
+                        }
+                    } else {
+                        user_cards[i].wd_socre--
+                    }
                 }
             }
         }
+        return user_cards;
     }
 }
 module.exports = SssGameService;

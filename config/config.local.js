@@ -67,8 +67,37 @@ module.exports = appInfo => {
   config.info = {
     room_key: "~!@#$(*&^%$&",
     DEFINE: {
-      PaiType: {
-        NONE: 0,
+      td: {
+        WL: 1,//乌龙
+        YD: 2,//1对
+        ST: 3,//三条
+        TH: 4,//同花
+        THS: 5//同花顺
+      },
+      zd: {
+        WL: 1,//乌龙
+        YD: 2,//1对
+        ED: 3,//2对
+        ST: 4,//三条
+        SZ: 5,//顺子
+        TH: 6,//同花
+        HL: 7,//葫芦
+        TZ: 8,//铁支
+        THS: 9,//同花顺
+        WT: 10//五同
+      },
+      wd: {
+        WL: 1,//乌龙
+        YD: 2,//1对
+        ED: 3,//2对
+        ST: 4,//三条
+        SZ: 5,//顺子
+        TH: 6,//同花
+        HL: 7,//葫芦
+        TZ: 8,//铁支
+        THS: 9//同花顺
+      },
+      old_guize: {
         WL: 1,//乌龙
         YD: 2,//1对
         ED: 3,//2对

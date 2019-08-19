@@ -25,20 +25,29 @@
                     socket.emit("ready");
 
                 });
-                socket.on("game_can_run", function (res) {
-                    console.log("game can  run....")
+                socket.on("game_pai_can_compare", function (res) {
                     console.log(res);
-                    socket.emit("start");
                 });
+                // socket.on("game_can_run", function (res) {
+                //     console.log("game can  run....")
+                //     console.log(res);
+                //     socket.emit("start");
+                // });
+                // socket.on("self_card", function (res) {
+                //     console.log("myself card....")
+                //     console.log(res);
+                //     socket.emit("compare_ready");
+                // });
+                // socket.emit("compare_ready");
 
-                socket.on("new_user_comes_push", function (res) {
-                    console.log("new user comming....")
-                    console.log(res);
-                });
-                socket.on("user_ready_push", function (res) {
-                    console.log("user_ready_push....")
-                    console.log(res);
-                });
+                // socket.on("new_user_comes_push", function (res) {
+                //     console.log("new user comming....")
+                //     console.log(res);
+                // });
+                // socket.on("user_ready_push", function (res) {
+                //     console.log("user_ready_push....")
+                //     console.log(res);
+                // });
             } else {
                 console.log("?????wocao ")
             }
