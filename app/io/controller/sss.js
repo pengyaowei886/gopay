@@ -247,10 +247,13 @@ class SssController extends Controller {
     //房主解散房间
     async   dispress() {
         const socket = this.ctx.socket;
-
         let roomid = socket.roomid;
         let userid = socket.userid;
-
+        //判断游戏状态，游戏中不能直接解散，需要进行投票
+        let room_info = await this.ctx.service.sssRoomSql.get_room_data(roomid);
+        if (room_info.status == 2) {  //游戏进行中不能退出
+            return
+        }
         //删除房间信息
         await this.ctx.service.sssRoomSql.delete_room(roomid);
         //通知其它玩家，房主解散了房间
@@ -269,11 +272,12 @@ class SssController extends Controller {
     //同意解散
     async   agree() {
         const socket = this.ctx.socket;
-
         let count = this.ctx.service.sssRoomSql.get_seat_data(roomid)
         socket.agree += 1;
         //一半人及以上同意就解散
         if (socket.agree >= count.length / 2) {
+            socket.agree = 0;
+            socket.reject = 0;
             socket.to(roomid).emit('room_dispress_result', { result: true });
         }
         //通知其它玩家投票意见
@@ -281,10 +285,12 @@ class SssController extends Controller {
     }
     //拒绝解散
     async reject() {
-        let count = this.ctx.service.sssRoomSql.get_seat_data(roomid)
+        let count = this.ctx.service.sssRoomSql.get_seat_data(roomid);
         socket.reject += 1;
         //一半人及以上不同意就不能解散
         if (socket.reject > count.length / 2) {
+            socket.agree = 0;
+            socket.reject = 0;
             socket.to(roomid).emit('room_dispress_result', { result: false });
         }
         //通知其它玩家投票意见

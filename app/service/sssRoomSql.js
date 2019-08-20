@@ -206,6 +206,37 @@ class SssRoomSqlService extends Service {
             throw new Error("将用户手牌插入数据库失败");
         }
     }
+    //修改用户对局信息
+    async update_user_game(info) {
+        const mysql = this.app.mysql;
+
+        if (res.affectedRows == info.length) {
+            return true;
+        } else {
+            throw new Error("将用户手牌插入数据库失败");
+        }
+    }
+    //扣除用户房费
+    async kouchu_user_gems(roomid) {
+        const mysql = this.app.mysql;
+        // let room_info = await this.get_room_data(roomid);
+        let user_data = await this.get_seat_data(roomid);
+        let userid = "";
+        for (let i in user_data) {
+            if (i == user_data.length - 1) {
+                userid = `${user_data[i].userid}  `
+            }
+            userid = `${user_data[i].userid} , `
+        }
+        //暂定一局2个房卡
+        let sql = `update t_users set gems = gems - 2 where userid in  ( ${userid} )`;
+        let res = await mysql.query(sql);
+        if (res.affectedRows == user_data.length) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     //判断用户的牌是否被动过手脚
     async user_card_true(userid, cardtool) {
         const mysql = this.app.mysql;
@@ -280,5 +311,6 @@ class SssRoomSqlService extends Service {
             throw new Error("查询用户的牌失败");
         }
     }
+
 }
 module.exports = SssRoomSqlService;
