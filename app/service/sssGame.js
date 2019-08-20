@@ -556,7 +556,7 @@ class SssGameService extends Service {
         }
     }
     //是否五同
-    is_ths(pai) {
+    is_wt(pai) {
         if (pai[0].value == pai[1].value == pai[2].value == pai[3].value == pai[4].value && this.is_sz(pai)) {
             return true;
         } else {
@@ -631,7 +631,6 @@ class SssGameService extends Service {
                 throw new Error("牌类型有问题")
             }
         }
-
     }
     //单牌比大小
     compare_danpai(pai1, pai2) {

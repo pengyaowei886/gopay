@@ -79,7 +79,7 @@ class SssRoomSqlService extends Service {
         if (rows.length > 0) {
             //判断局数
             if (rows[0].ju_num > rows[0].turn) {
-                let res = mysql.select('t_sss_rooms', { turn: rows[0].turn + 1, status: 1 }, { where: { id: roomId } });
+                let res = mysql.select('t_sss_rooms', { turn: rows[0].turn + 1, status: 0 }, { where: { id: roomId } });
                 if (res.affectedRows == 1) {
                     return true;
                 } else {
@@ -124,6 +124,16 @@ class SssRoomSqlService extends Service {
     async update_user_status(userid, status) {
         const mysql = this.app.mysql;
         let res = await mysql.update('t_user_join_room', { ready: status }, { where: { userid: userid } });
+        if (res.affectedRows == 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    //修改用户对局信息
+    async update_user_game(userid) {
+        const mysql = this.app.mysql;
+        let res = await mysql.update('t_user_join_room', { ready: 0, card: "", td: "", zd: "", wd: "" }, { where: { userid: userid } });
         if (res.affectedRows == 1) {
             return true;
         } else {
@@ -198,7 +208,6 @@ class SssRoomSqlService extends Service {
     }
     //判断用户的牌是否被动过手脚
     async user_card_true(userid, cardtool) {
-
         const mysql = this.app.mysql;
         let card_info = await mysql.select('t_user_join_room', { where: { userid: userid }, columns: ['card'] })
         let card = card_info[0].card;
@@ -260,6 +269,12 @@ class SssRoomSqlService extends Service {
         const mysql = this.app.mysql;
         let card_info = await mysql.select('t_user_join_room', { where: { roomid: roomid }, columns: ['td', 'zd', 'wd', 'userid'] })
         if (card_info.length > 0) {
+
+            for (let i in card_info) {
+                card_info[i].td = JSON.parse(card_info[i].td);
+                card_info[i].zd = JSON.parse(card_info[i].zd);
+                card_info[i].wd = JSON.parse(card_info[i].wd);
+            }
             return card_info;
         } else {
             throw new Error("查询用户的牌失败");

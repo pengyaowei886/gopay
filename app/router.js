@@ -38,7 +38,7 @@ module.exports = app => {
   //回到大厅
   io.of('/sss').route('back_to_hall', io.controller.sss.back_to_hall)
   //退出房间
-  io.of('/sss').route('exit', io.controller.sss.back_to_hall)
+  io.of('/sss').route('exit', io.controller.sss.exit)
 
   // //德州扑克socket
   // io.of('/dzpk').route('connection', io.controller.dzpk.server);
