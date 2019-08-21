@@ -669,7 +669,7 @@ class SssGameService extends Service {
                 } else {
                     //比较头墩
                     let pai1 = this.get_pai_type(user_cards[i].td);
-                    let pai1 = this.get_pai_type(user_cards[j].td);
+                    let pai2 = this.get_pai_type(user_cards[j].td);
                     user_cards[i].td_socre = 0;
                     if (pai1 > pai2) {
                         user_cards[i].td_socre++
