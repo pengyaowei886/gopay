@@ -6,66 +6,68 @@ class SssController extends Controller {
 
     async login() {
         const { ctx, app } = this;
-
-
         const data = ctx.args[0];
+        try {
+            let userid = data.userid;
+            let roomId = data.roomid;
+            let socket = ctx.socket;
+            //给socket赋值
+            socket.userid = userid;
+            socket.roomid = roomId;
+            let room_is_exist = await this.ctx.service.sssRoomSql.room_is_exist(roomId);
+            //给socket 赋值
+            if (!room_is_exist) {
+                let ret = {
+                    errcode: 2,
+                    errmsg: "room is not exist"
+                };
+                await socket.emit('login_result', ret);
+            }
+            let seat_info = await this.ctx.service.sssRoomSql.get_seat_data(roomId);
+            let room_info = await this.ctx.service.sssRoomSql.get_room_data(roomId);
+
+            let userData = null;
+            let seats = [];
+            for (var i = 0; i < seat_info.length; i++) {
+                let rs = seat_info[i]
+                seats.push({
+                    userid: rs.userid,
+                    ip: rs.ip,
+                    score: rs.score,
+                    name: rs.name,
+                    online: rs.online,
+                    headimg: rs.headimg,
+                    ready: rs.ready,
+                    seatindex: rs.seat_index
+                });
+                if (userid == rs.userid) {
+                    userData = seats[i];
+                }
+            }
+            //通知前端
+            let ret = {
+                errcode: 0,
+                errmsg: "ok",
+                data: {
+                    roomid: roomId,
+                    conf: room_info,
+                    seats: seats
+                }
+            };
+            socket.join(roomId, () => {
+                // let socketroom = app.io.of("/sss").adapter.rooms[roomId];
+                // console.log(socketroom);
+                //通知当前客户端
+                socket.emit('login_result', ret);
+                //通知当前房间其它客户端
+                socket.broadcast.to(roomId).emit('new_user_comes_push', userData);
+            })
+        } catch (error) {
+            socket.emit('error', error.msg);
+        }
 
         // let room_key = app.config.info.room_key;
-        let userid = data.userid;
-        let roomId = data.roomid;
-        let socket = ctx.socket;
-        //给socket赋值
-        socket.userid = userid;
-        socket.roomid = roomId;
-        let room_is_exist = await this.ctx.service.sssRoomSql.room_is_exist(roomId);
-        //给socket 赋值
-        if (!room_is_exist) {
-            let ret = {
-                errcode: 2,
-                errmsg: "room is not exist"
-            };
-            await socket.emit('login_result', ret);
-        }
-        let seat_info = await this.ctx.service.sssRoomSql.get_seat_data(roomId);
-        let room_info = await this.ctx.service.sssRoomSql.get_room_data(roomId);
 
-        let userData = null;
-        let seats = [];
-        for (var i = 0; i < seat_info.length; i++) {
-            let rs = seat_info[i]
-            seats.push({
-                userid: rs.userid,
-                ip: rs.ip,
-                score: rs.score,
-                name: rs.name,
-                online: rs.online,
-                headimg: rs.headimg,
-                ready: rs.ready,
-                seatindex: rs.seat_index
-            });
-            if (userid == rs.userid) {
-                userData = seats[i];
-            }
-        }
-        //通知前端
-        let ret = {
-            errcode: 0,
-            errmsg: "ok",
-            data: {
-                roomid: roomId,
-                conf: room_info,
-                seats: seats
-            }
-        };
-
-        socket.join(roomId, () => {
-            // let socketroom = app.io.of("/sss").adapter.rooms[roomId];
-            // console.log(socketroom);
-            //通知当前客户端
-            socket.emit('login_result', ret);
-            //通知当前房间其它客户端
-            socket.broadcast.to(roomId).emit('new_user_comes_push', userData);
-        })
 
     }
 
@@ -93,28 +95,32 @@ class SssController extends Controller {
         // 判断是否可以准备
         let room_info = await this.ctx.service.sssRoomSql.get_room_data(roomid);
         //游戏对局数没用完而且处于待准备状态
-        if (room_info.status != 2 && room_info.ju_num != room_info.turn) {
-            //房费不足，直接返回
-            if (room_info.info.fangfei_type == 2) {
-                if (user_info.gems < 2) {
-                    return
-                }
-            }
-            //更新用户游戏状态
-            await this.ctx.service.sssRoomSql.update_user_status(userid, 1);
-            //更改房间状态
-            await this.ctx.service.sssRoomSql.update_room_status(roomid, 1);
-            //广播给其他客户端
-            socket.broadcast.to(roomid).emit('user_ready_push', { userid: userid, ready: true });
-            //判断该用户准备能否开始游戏
-            let can_run = this.ctx.service.sssRoomSql.game_can_running(roomid);
-            if (can_run) {
-                //通知房间内所有用户游戏可以开始
-                socket.to(roomid).emit('game_can_run', { userid: userid });
-            }
-        } else {
+
+        //游戏已经开始 不能准备
+        if (room_info.info.status == 2) {
             return
         }
+        //房费不足，直接返回
+        if (room_info.info.fangfei_type == 2) {
+            if (user_info.gems < 2) {
+                return
+            }
+        }
+        //更新用户游戏状态
+        await this.ctx.service.sssRoomSql.update_user_status(userid, 1);
+        //更改房间状态
+        await this.ctx.service.sssRoomSql.update_room_status(roomid, 1);
+        //广播给其他客户端
+        socket.broadcast.to(roomid).emit('user_ready_push', { userid: userid, ready: true });
+        //判断该用户准备能否开始游戏
+        let can_run = this.ctx.service.sssRoomSql.game_can_running(roomid);
+        if (can_run) {
+            //通知房间内所有用户游戏可以开始
+            socket.to(roomid).emit('game_can_run', { userid: userid });
+        }
+
+
+
     }
     //游戏开始
     async start() {
@@ -190,22 +196,31 @@ class SssController extends Controller {
     // 比牌
     async compare() {
         const socket = this.ctx.socket;
-        let roomid = socket.roomid;
-
-        //查询该房间内所有用户的牌
-        let user_card = await this.ctx.service.sssRoomSql.get_all_user_card(roomid);
-        //比牌
-        let compare = await this.ctx.service.sssGame.compare(user_card);
-        //比牌结果通知到房间内所有用户
-        socket.to(roomid).emit('compare_result', compare);
-        //修改房间对局信息
-        await this.ctx.service.sssRoomSql.update_room_data(roomid);
-        let userid = [];
-        for (let i in user_card) {
-            userid.push(user_card[i].userid)
+        try {
+            let roomid = socket.roomid;
+            //查询该房间内所有用户的牌
+            let user_card = await this.ctx.service.sssRoomSql.get_all_user_card(roomid);
+            //比牌
+            let compare = await this.ctx.service.sssGame.compare(user_card);
+            //比牌结果通知到房间内所有用户
+            socket.to(roomid).emit('compare_result', compare);
+            //修改房间对局信息
+            let res = await this.ctx.service.sssRoomSql.update_room_data(roomid);
+            if (res) {
+                let userid = [];
+                for (let i in user_card) {
+                    userid.push(user_card[i].userid)
+                }
+                //修改用户对局信息
+                await this.ctx.service.sssRoomSql.update_user_game(userid);
+            } else { //对局已经打完
+                let result = await this.ctx.service.sssRoomSql.get_user_score(roomid);
+                //通知所有用户游戏结束,并将对局结果广播
+                socket.to(roomid).emit('game_over', result);
+            }
+        } catch (error) {
+            socket.emit('error', error.msg);
         }
-        //修改用户对局信息
-        await this.ctx.service.sssRoomSql.update_user_game(userid);
     }
 
     // 退出房间
@@ -214,7 +229,6 @@ class SssController extends Controller {
         const socket = this.ctx.socket;
         let roomid = socket.roomid;
         let userid = socket.userid;
-
         // 判断是否可以退出
         let room_info = await this.ctx.service.sssRoomSql.get_room_data(roomid);
         if (room_info.status == 2) {  //游戏进行中不能退出
@@ -240,7 +254,6 @@ class SssController extends Controller {
         let userid = socket.userid;
         //通知其它玩家，有人退出了房间
         socket.broadcast.to(roomid).emit('user_disconnect', { userid: userid });
-        //其他人等30秒
     }
 
 
@@ -251,28 +264,26 @@ class SssController extends Controller {
         let userid = socket.userid;
         //判断游戏状态，游戏中不能直接解散，需要进行投票
         let room_info = await this.ctx.service.sssRoomSql.get_room_data(roomid);
-        if (room_info.status == 2) {  //游戏进行中不能退出
+        if (room_info.status == 2) {  //游戏进行中不能解散
+            //通知其它玩家，有人请求解散房间
+            socket.broadcast.to(roomid).emit('request_room_dispress', { userid: userid });
             return
         }
+
         //删除房间信息
         await this.ctx.service.sssRoomSql.delete_room(roomid);
+        //删除玩家座位信息
+
+        //保存玩家对局记录并把对局记录返回给客户端
+
         //通知其它玩家，房主解散了房间
         socket.broadcast.to(roomid).emit('room_dispress', { userid: userid });
     }
-    //请求解散房间
-    async   request_dispress() {
-        const socket = this.ctx.socket;
-        let roomid = socket.roomid;
-        let userid = socket.userid;
-        socket.agree = 1;
-        socket.reject = 0;
-        //通知其它玩家，有人请求解散房间
-        socket.broadcast.to(roomid).emit('request_room_dispress', { userid: userid });
-    }
+
     //同意解散
     async   agree() {
         const socket = this.ctx.socket;
-        let count = this.ctx.service.sssRoomSql.get_seat_data(roomid)
+        let count = this.ctx.service.sssRoomSql.get_seat_data(roomid);
         socket.agree += 1;
         //一半人及以上同意就解散
         if (socket.agree >= count.length / 2) {

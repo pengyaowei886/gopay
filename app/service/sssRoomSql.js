@@ -130,6 +130,17 @@ class SssRoomSqlService extends Service {
             return false;
         }
     }
+
+    //获取用户对局记录
+    async get_user_score(roomid) {
+        const mysql = this.app.mysql;
+        let res = await mysql.select('t_user_join_room', { where: { roomid: roomid }, columns: ['score', 'userid'] });
+        if (res.length > 0) {
+            return res;
+        } else {
+            throw new Error("查询对局信息失败");
+        }
+    }
     //修改用户对局信息
     async update_user_game(userid) {
         const mysql = this.app.mysql;
@@ -206,16 +217,16 @@ class SssRoomSqlService extends Service {
             throw new Error("将用户手牌插入数据库失败");
         }
     }
-    //修改用户对局信息
-    async update_user_game(info) {
-        const mysql = this.app.mysql;
+    // //修改用户对局信息
+    // async update_user_game(info) {
+    //     const mysql = this.app.mysql;
 
-        if (res.affectedRows == info.length) {
-            return true;
-        } else {
-            throw new Error("将用户手牌插入数据库失败");
-        }
-    }
+    //     if (res.affectedRows == info.length) {
+    //         return true;
+    //     } else {
+    //         throw new Error("将用户手牌插入数据库失败");
+    //     }
+    // }
     //扣除用户房费
     async kouchu_user_gems(roomid) {
         const mysql = this.app.mysql;

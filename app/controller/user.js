@@ -24,12 +24,12 @@ class UserController extends Controller {
                 password: {
                     type: 'string', required: true, allowEmpty: false
                 },
-                headimg: {
-                    type: 'string', required: true, allowEmpty: false
-                },
-                name: {
-                    type: 'string', required: true, allowEmpty: false
-                }
+                // headimg: {
+                //     type: 'string', required: true, allowEmpty: false
+                // },
+                // name: {
+                //     type: 'string', required: true, allowEmpty: false
+                // }
             }, ctx.request.body);
         } catch (e) {
             ctx.logger.warn(e);
@@ -46,9 +46,9 @@ class UserController extends Controller {
      
             let account = ctx.request.body.account;
             let password = ctx.request.body.password;
-            let headimg = ctx.request.body.headimg;
-            let name = ctx.request.body.name;
-            let data = await ctx.service.user.register(account, password,name,headimg);
+            // let headimg = ctx.request.body.headimg;
+            // let name = ctx.request.body.name;
+            let data = await ctx.service.user.register(account, password);
             return handerThis.succ(data);
         } catch (error) {
             return handerThis.error('HANDLE_ERROR', error['message']);

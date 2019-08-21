@@ -77,14 +77,14 @@ class UserService extends Service {
                 sex: data.sex
             };
             //判断用户是否有对局
-            let user_seat_exist = await this.ctx.service.userSql.get_user_seat(data.userid);
+            let user_seat_exist = await ctx.service.userSql.get_user_seat(data.userid);
             if (user_seat_exist) {
-                let user_room_exist = await this.ctx.service.sssRoomSql.room_is_exist(user_seat_exist);
+                let user_room_exist = await ctx.service.sssRoomSql.room_is_exist(user_seat_exist);
                 if (user_room_exist) {
                     ret.roomid = user_seat_exist;
                     return ret
                 } else {
-                    await this.ctx.service.userSql.delete_user_seat(data.userid);
+                    await ctx.service.userSql.delete_user_seat(data.userid);
                     return ret;
                 }
             } else {

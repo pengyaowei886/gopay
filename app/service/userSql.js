@@ -4,21 +4,19 @@ const Service = require('egg').Service;
 
 class UserSqlService extends Service {
     //用户注册
-    async create_user(account, password, name, headimg) {
+    async create_user(account, password) {
         const mysql = this.app.mysql;
         let jiamiacc = Buffer.from(account).toString('base64');
         let user = await mysql.select('t_users', { where: { account: jiamiacc } });
         if (user.length == 0) {
-            let jiaminame = Buffer.from(name).toString('base64');
+            // let jiaminame = Buffer.from(name).toString('base64');
             let jiamipsw = Buffer.from(password).toString('base64');
             let result = await mysql.insert('t_users', {
                 account: jiamiacc,
-                name: jiaminame,
                 password: jiamipsw,
                 coins: 0,
                 gems: 0,//房卡
                 sex: 0,//
-                headimg: headimg,
                 ctime: new Date().getTime()
             });
             if (result.affectedRows == 1) {

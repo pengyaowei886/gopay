@@ -34,13 +34,19 @@ module.exports = app => {
   //比牌
   io.of('/sss').route('compare', io.controller.sss.compare);
   //比牌准备
-  io.of('/sss').route('compare_ready', io.controller.sss.compare_ready);
+  io.of('/sss').route('compare_ready', io.controller.sss.compare_ready)
   //回到大厅
   io.of('/sss').route('back_to_hall', io.controller.sss.back_to_hall)
+  //解散房间
+  io.of('/sss').route('dispress', io.controller.sss.dispress)
+  //同意
+  io.of('/sss').route('agree', io.controller.sss.agree)
+  //拒绝
+  io.of('/sss').route('reject', io.controller.sss.reject)
   //退出房间
   io.of('/sss').route('exit', io.controller.sss.exit)
 
   // //德州扑克socket
-  // io.of('/dzpk').route('connection', io.controller.dzpk.server);
+  // io.of('/dzpk').route('login', io.controller.dzpk.server);
 
 }

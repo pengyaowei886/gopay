@@ -54,8 +54,7 @@ class SssSqlService extends Service {
                         throw new Error("房间已满")
                     } else {
                         //最后一个位置 安排坐下
-                        await this.service.sssRoomSql.set_user_seat(user_info.userid, roomid, i, 1)
-
+                        await this.service.sssRoomSql.set_user_seat(user_info.userid, roomid, i, 1);
                         return {};
                     }
                 }
