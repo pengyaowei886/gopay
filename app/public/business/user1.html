@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Socket????</title>
+    <title>客户端1</title>
 </head>
 
 <body>
@@ -11,25 +11,57 @@
     <script src="https://cdn.bootcss.com/socket.io/2.1.1/socket.io.js"></script>
     <script type="text/javascript">
         $(function () {
-
             var data = {
                 roomid: "285074",
                 userid: 37
             }
-            var socket = io("ws://127.0.0.1:7001/sss");  //ip
-            if (socket.disconnected) {
-
+            var cardtool = {
+                td: [{ type: 2, value: 10 },
+                { type: 2, value: 13 },
+                { type: 1, value: 12 }],
+                zd: [{ type: 1, value: 11 },
+                { type: 1, value: 7 },
+                { type: 1, value: 2 },
+                { type: 2, value: 8 },
+                { type: 2, value: 5 }],
+                wd: [{ type: 1, value: 1 },
+                { type: 2, value: 4 },
+                { type: 1, value: 6 },
+                { type: 2, value: 6 },
+                { type: 2, value: 2 }]
+            };
+            var socket = io("ws://127.0.0.1:7001/sss");
+            if (socket.disconnected) { //最大bug 断开既连接，连接既断开
                 socket.emit("login", data);
                 socket.on("login_result", function (res) {
                     console.log(res);
-
+                    socket.emit("ready");
                 });
-                socket.on("new_user_comes_push", function (res) {
-                    console.log("new user comming....")
+                socket.on("game_pai_can_compare", function (res) {
                     console.log(res);
                 });
+                // socket.on("game_can_run", function (res) {
+                //     console.log("game can  run....")
+                //     socket.emit("start");
+                //     console.log(res);
+                // });
+                // socket.on("new_user_comes_push", function (res) {
+                //     console.log("new user comming....")
+                //     console.log(res);
+                // });
+                // socket.on("self_card", function (res) {
+                //     console.log("myself card....")
+                //     console.log(res);
+                //     socket.emit("compare_ready");
+                // });
+                // socket.on("user_ready_push", function (res) {
+                //     console.log("user_ready_push....")
+                //     console.log(res);
+                // });
+                socket.emit("compare_ready", cardtool);
             } else {
-                console.log("?????wocao ")
+                //虚假的连接，其实是断开
+                console.log("wocao......")
             }
         })
     </script>

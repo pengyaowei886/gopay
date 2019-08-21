@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Socket????</title>
+    <title>???2</title>
 </head>
 
 <body>
@@ -17,21 +17,37 @@
                 userid: 41
             }
             var socket = io("ws://127.0.0.1:7001/sss");  //ip
-            console.log(socket);
-            console.log(socket.connected);
-            console.log(socket.disconnected);
             if (socket.disconnected) {
 
                 socket.emit("login", data);
                 socket.on("login_result", function (res) {
                     console.log(res);
+                    socket.emit("ready");
 
                 });
-                socket.on("new_user_comes_push", function (res) {
-                    console.log("new user comming....")
+                socket.on("game_pai_can_compare", function (res) {
                     console.log(res);
-
                 });
+                // socket.on("game_can_run", function (res) {
+                //     console.log("game can  run....")
+                //     console.log(res);
+                //     socket.emit("start");
+                // });
+                // socket.on("self_card", function (res) {
+                //     console.log("myself card....")
+                //     console.log(res);
+                //     socket.emit("compare_ready");
+                // });
+                // socket.emit("compare_ready");
+
+                // socket.on("new_user_comes_push", function (res) {
+                //     console.log("new user comming....")
+                //     console.log(res);
+                // });
+                // socket.on("user_ready_push", function (res) {
+                //     console.log("user_ready_push....")
+                //     console.log(res);
+                // });
             } else {
                 console.log("?????wocao ")
             }
