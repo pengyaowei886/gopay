@@ -3,7 +3,7 @@ const Service = require('egg').Service;
 
 
 class RoomSqlService extends Service {
-       
+
 
     //判断房间是否存在
     async room_is_exist(roomid) {
@@ -15,6 +15,5 @@ class RoomSqlService extends Service {
             return false;
         }
     }
-
 }
 module.exports = RoomSqlService;

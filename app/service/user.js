@@ -94,13 +94,22 @@ class UserService extends Service {
     }
 
     /**
+ *  查询用户基本信息
+ * 
+ */
+    async query_user_info(userid) {
+        let result = await this.ctx.service.userSql.get_user_data_by_id(userid);
+        return result;
+    }
+
+    /**
     * 用户修改基本信息
     * 
     */
     async update_user_info(userid, name, headimg, sex) {
-
         await this.ctx.service.user_sql.update_user_info(userid, name, sex, headimg);
         return {};
     }
+
 }
 module.exports = UserService;

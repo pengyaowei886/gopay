@@ -15,7 +15,8 @@ module.exports = app => {
 
   //用户登陆
   router.get('/login', controller.user.login);
-
+  //用户登陆
+  router.get('/user/info', controller.user.query_user_info);
 
   /****************** 十三水 http *************** *************/
   //创建房间

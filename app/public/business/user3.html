@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cn">
 
 <head>
     <meta charset="UTF-8">
-    <title>???3</title>
+    <title>客户端3</title>
 </head>
 
 <body>
@@ -11,27 +11,22 @@
     <script src="https://cdn.bootcss.com/socket.io/2.1.1/socket.io.js"></script>
     <script type="text/javascript">
         $(function () {
-
             var data = {
                 roomid: "259562",
                 userid: 42
             }
-            var socket = io("ws://127.0.0.1:7001/sss");  //ip
-      
+            var socket = io("ws://127.0.0.1:7001/sss");  //ip 
             if (socket.disconnected) {
-
                 socket.emit("join", data);
                 socket.on("login_result", function (res) {
                     console.log(res);
-
                 });
                 socket.on("new_user_comes_push", function (res) {
                     console.log("new user comming....")
                     console.log(res);
-
                 });
             } else {
-                console.log("?????wocao ")
+                console.log("?????wocao")
             }
         })
     </script>

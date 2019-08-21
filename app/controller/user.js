@@ -43,7 +43,7 @@ class UserController extends Controller {
         try {
             let handerThis = this;
             const { ctx, app, service } = handerThis;
-     
+
             let account = ctx.request.body.account;
             let password = ctx.request.body.password;
             // let headimg = ctx.request.body.headimg;
@@ -84,103 +84,42 @@ class UserController extends Controller {
         try {
             let account = ctx.request.query.account;
             let password = ctx.request.query.password;
-            let host=ctx.request.host;
-            let ip=host.split(':')[0];
-          
-            let data = await service.user.login(account,password,ip);
+            let host = ctx.request.host;
+            let ip = host.split(':')[0];
+
+            let data = await service.user.login(account, password, ip);
             return handerThis.succ(data);
         } catch (error) {
             return handerThis.error('HANDLE_ERROR', error['message']);
         }
     }
-    /**
-     * 修改密码
-     */
-    async update_pw() {
-        let handerThis = this;
-        const { ctx, app, service } = handerThis;
-        //参数校验
-        try {
-            //使用插件进行验证 validate    
-            ctx.validate({
-                new_password: {//字符串 必填 不允许为空字符串 
-                    type: 'string', required: true, allowEmpty: false
-                },
-            }, ctx.request.body);
-        } catch (e) {
-            ctx.logger.warn(e);
-            let logContent = e.code + ' ' + e.message + ',';
-            for (let i in e.errors) {
-                logContent += e.errors[i]['code'] + ' ' + e.errors[i]['field'] + ' ' + e.errors[i]['message'] + ' '
-            }
-            return handerThis.error('PARAMETERS_ERROR', logContent);
-        }
-        //逻辑处理
-        try {
-            let uid = handerThis.user().uid;
-            let password = ctx.request.body.new_password;
-            let data = await service.user.update_pw(uid, password);
-            return handerThis.succ(data);
-        } catch (error) {
-            return handerThis.error('HANDLE_ERROR', error['message']);
-        }
-    }
-    /**
-     * 修改昵称
-     */
-    async update_info() {
-        let handerThis = this;
-        const { ctx, app, service } = handerThis;
-        //参数校验
-        try {
-            //使用插件进行验证 validate    
-            ctx.validate({
-                new_name: {//字符串 必填 允许为空字符串 
-                    type: 'string', required: true, allowEmpty: true
-                },
-                head_pic: {//字符串 必填 允许为空字符串 
-                    type: 'string', required: true, allowEmpty: true
-                },
-            }, ctx.request.body);
-        } catch (e) {
-            ctx.logger.warn(e);
-            let logContent = e.code + ' ' + e.message + ',';
-            for (let i in e.errors) {
-                logContent += e.errors[i]['code'] + ' ' + e.errors[i]['field'] + ' ' + e.errors[i]['message'] + ' '
-            }
-            return handerThis.error('PARAMETERS_ERROR', logContent);
-        }
-        //逻辑处理
-        try {
-            let uid = handerThis.user().uid;
-            let name = ctx.request.body.new_name;
-            let head_pic = ctx.request.body.head_pic;
-            if (!name && head_pic) {
-                let data = await service.user.update_info(uid, null, head_pic);
-                return handerThis.succ(data);
-            }
-            if (name && !head_pic) {
-                let data = await service.user.update_info(uid, name, null);
-                return handerThis.succ(data);
-            }
-            if (!name && !head_pic) {
-                throw new Error("参数有误");
-            }
-        } catch (error) {
-            return handerThis.error('HANDLE_ERROR', error['message']);
-        }
-    }
-    /**
-     * 查询用户基本资料
+    /*
+    * 查询用户基本资料
      */
     async query_user_info() {
         let handerThis = this;
         const { ctx, app, service } = handerThis;
 
+        //参数校验
+        try {
+            //使用插件进行验证 validate    
+            ctx.validate({
+                userid: {//字符串 必填 不允许为空字符串 
+                    type: 'string', required: true, allowEmpty: false
+                }
+            }, ctx.request.query);
+        } catch (e) {
+            ctx.logger.warn(e);
+            let logContent = e.code + ' ' + e.message + ',';
+            for (let i in e.errors) {
+                logContent += e.errors[i]['code'] + ' ' + e.errors[i]['field'] + ' ' + e.errors[i]['message'] + ' '
+            }
+            return handerThis.error('PARAMETERS_ERROR', logContent);
+        }
         //逻辑处理
         try {
-            let uid = handerThis.user().uid;
-            let data = await service.user.query_user_info(uid);
+            let userid = Number(ctx.request.query.userid)
+            let data = await service.user.query_user_info(userid);
             return handerThis.succ(data);
         } catch (error) {
             return handerThis.error('HANDLE_ERROR', error['message']);

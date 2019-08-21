@@ -73,12 +73,12 @@ class UserSqlService extends Service {
     //根据id查询用户数据
     async get_user_data_by_id(userid) {
         const mysql = this.app.mysql;
-        let user = await mysql.select('t_users', { where: { userid: userid }, colmuns: ['userid', 'account', 'name', 'headimg', 'coins', 'gems', 'roomid'] });
+        let user = await mysql.select('t_users', { where: { userid: userid }, columns: ['userid', 'account', 'name', 'headimg', 'coins', 'gems', 'roomid'] });
         if (user.length > 0) {
             //对name进行解密
 
-            user[0].name = Buffer.from(user[0].name, 'base64').toString()
-
+            // user[0].name = Buffer.from(user[0].name, 'base64').toString()
+            user[0].account = Buffer.from(user[0].account, 'base64').toString()
             return user[0];
         } else {
             throw new Error("查询用户数据失败");
@@ -88,11 +88,11 @@ class UserSqlService extends Service {
     async get_user_data_by_account(account) {
         const mysql = this.app.mysql;
         let new_account = Buffer.from(account).toString('base64');
-        let user = await mysql.select('t_users', { where: { account: new_account }, colmuns: ['userid', 'account', 'name', 'headimg', 'coins', 'gems', 'roomid'] });
+        let user = await mysql.select('t_users', { where: { account: new_account }, columns: ['userid', 'account', 'name', 'headimg', 'coins', 'gems', 'roomid'] });
         if (user.length > 0) {
             //对name进行解密
-
-            user[0].name = Buffer.from(user[0].name, 'base64').toString()
+            // user[0].name = Buffer.from(user[0].name, 'base64').toString();
+            user[0].account = Buffer.from(user[0].account, 'base64').toString()
             return user[0];
         } else {
             throw new Error("查询用户数据失败");

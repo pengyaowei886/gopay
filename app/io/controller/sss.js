@@ -63,7 +63,7 @@ class SssController extends Controller {
                 socket.broadcast.to(roomId).emit('new_user_comes_push', userData);
             })
         } catch (error) {
-            socket.emit('error', error.msg);
+            socket.emit('error', error.message);
         }
 
         // let room_key = app.config.info.room_key;
@@ -91,13 +91,13 @@ class SssController extends Controller {
 
 
         //如果aa，判断房卡是否足够
-        let user_info = await this.ctx.service.sssRoomSql.get_user_data_by_id(userid, 1);
+        let user_info = await this.ctx.service.userSql.get_user_data_by_id(userid, 1);
         // 判断是否可以准备
         let room_info = await this.ctx.service.sssRoomSql.get_room_data(roomid);
         //游戏对局数没用完而且处于待准备状态
 
         //游戏已经开始 不能准备
-        if (room_info.info.status == 2) {
+        if (room_info.status == 2) {
             return
         }
         //房费不足，直接返回
@@ -219,7 +219,7 @@ class SssController extends Controller {
                 socket.to(roomid).emit('game_over', result);
             }
         } catch (error) {
-            socket.emit('error', error.msg);
+            socket.emit('error', error.message);
         }
     }
 
