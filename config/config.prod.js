@@ -48,7 +48,7 @@ module.exports = appInfo => {
   config.cluster = {
     listen: {
       port: 7001,
-      hostname: '47.103.63.239',
+      hostname: '172.19.87.165',
       // https:{
       //   key:"D:/work/ssl/0_xingyumeng.com.key",
       //   cert:"D:/worssl/1_xingyumeng.com_bundle.pem"
