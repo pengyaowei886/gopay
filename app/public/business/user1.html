@@ -30,14 +30,18 @@
                 { type: 2, value: 6 },
                 { type: 2, value: 2 }]
             };
-            var socket = io("ws://127.0.0.1:7001/sss");
-            if (socket.disconnected) { //最大bug 断开既连接，连接既断开
+            var socket = io("ws://47.103.63.239:7001/sss");
+            console.log(socket)
+      
                 socket.emit("login", data);
                 socket.on("login_result", function (res) {
                     console.log(res);
                     socket.emit("ready");
                 });
                 socket.on("game_pai_can_compare", function (res) {
+                    console.log(res);
+                });
+                socket.on("res", function (res) {
                     console.log(res);
                 });
                 // socket.on("game_can_run", function (res) {
@@ -59,10 +63,10 @@
                 //     console.log(res);
                 // });
                 socket.emit("compare_ready", cardtool);
-            } else {
-                //虚假的连接，其实是断开
-                console.log("wocao......")
-            }
+            // } else {
+            //     //虚假的连接，其实是断开
+            //     console.log("wocao......")
+            // }
         })
     </script>
 </body>

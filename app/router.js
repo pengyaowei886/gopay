@@ -15,7 +15,7 @@ module.exports = app => {
 
   //用户登陆
   router.get('/login', controller.user.login);
-  //用户登陆
+  //用户查询基本信息
   router.get('/user/info', controller.user.query_user_info);
 
   /****************** 十三水 http *************** *************/
