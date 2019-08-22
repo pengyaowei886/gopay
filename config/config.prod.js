@@ -15,11 +15,11 @@ module.exports = appInfo => {
     }
   };
   //请求格式和是否跨域
-  // config.cors = {
-  //   allowMethods: 'GET,POST,PUT,DELETE,OPTIONS',
-  //   credentials: true,
-  //   origin: '*'
-  // }
+  config.cors = {
+    allowMethods: 'GET,POST,PUT,DELETE,OPTIONS',
+    credentials: true,
+    origin: '*'
+  }
   config.mysql = {
     // 单数据库信息配置
     client: {
