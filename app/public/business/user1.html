@@ -33,37 +33,43 @@
             var socket = io("ws://47.103.63.239:7001/sss");
             // var socket = io("ws://127.0.0.1:7001/sss");
             console.log(socket)
-      
-                socket.emit("login", data);
-                socket.on("login_result", function (res) {
-                    console.log(res);
-                    socket.emit("ready");
-                });
-                socket.on("game_pai_can_compare", function (res) {
-                    console.log(res);
-                });
-                socket.on("res", function (res) {
-                    console.log(res);
-                });
-                // socket.on("game_can_run", function (res) {
-                //     console.log("game can  run....")
-                //     socket.emit("start");
-                //     console.log(res);
-                // });
-                // socket.on("new_user_comes_push", function (res) {
-                //     console.log("new user comming....")
-                //     console.log(res);
-                // });
-                // socket.on("self_card", function (res) {
-                //     console.log("myself card....")
-                //     console.log(res);
-                //     socket.emit("compare_ready");
-                // });
-                // socket.on("user_ready_push", function (res) {
-                //     console.log("user_ready_push....")
-                //     console.log(res);
-                // });
-                socket.emit("compare_ready", cardtool);
+
+            socket.emit("login", data);
+            socket.on("login_result", function (res) {
+                console.log(res);
+                socket.emit("ready");
+            });
+            socket.on("connection", function (res) {
+                console.log("weiioadfk");
+            });
+            socket.on("disconnect", function (res) {
+                console.log("111111111111111");
+            });
+            socket.on("game_pai_can_compare", function (res) {
+                console.log(res);
+            });
+            socket.on("res", function (res) {
+                console.log(res);
+            });
+            // socket.on("game_can_run", function (res) {
+            //     console.log("game can  run....")
+            //     socket.emit("start");
+            //     console.log(res);
+            // });
+            // socket.on("new_user_comes_push", function (res) {
+            //     console.log("new user comming....")
+            //     console.log(res);
+            // });
+            // socket.on("self_card", function (res) {
+            //     console.log("myself card....")
+            //     console.log(res);
+            //     socket.emit("compare_ready");
+            // });
+            // socket.on("user_ready_push", function (res) {
+            //     console.log("user_ready_push....")
+            //     console.log(res);
+            // });
+            socket.emit("compare_ready", cardtool);
             // } else {
             //     //虚假的连接，其实是断开
             //     console.log("wocao......")
