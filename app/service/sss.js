@@ -25,7 +25,6 @@ class SssSqlService extends Service {
         if (is_in_room) {
             return {};
         }
-
         let room_info = await this.service.sssRoomSql.get_room_data(roomid);
         let user_info = await this.service.userSql.get_user_data_by_id(userid);
         let seat_info = await this.service.sssRoomSql.get_seat_data(roomid);

@@ -25,7 +25,6 @@ class SssController extends Controller {
             }
             let seat_info = await this.ctx.service.sssRoomSql.get_seat_data(roomId);
             let room_info = await this.ctx.service.sssRoomSql.get_room_data(roomId);
-
             let userData = null;
             let seats = [];
             for (var i = 0; i < seat_info.length; i++) {
@@ -55,8 +54,8 @@ class SssController extends Controller {
                 }
             };
             socket.join(roomId, () => {
-                // let socketroom = app.io.of("/sss").adapter.rooms[roomId];
-                // console.log(socketroom);
+                let socketroom = app.io.of("/sss").adapter.rooms[roomId];
+                console.log(socketroom);
                 //通知当前客户端
                 socket.emit('login_result', ret);
                 //通知当前房间其它客户端

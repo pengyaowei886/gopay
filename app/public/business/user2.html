@@ -16,7 +16,8 @@
                 roomid: "285074",
                 userid: 41
             }
-            var socket = io("ws://127.0.0.1:7001/sss");  //ip
+            var socket = io("ws://47.103.63.239:7001/sss");
+            console.log(socket)
             if (socket.disconnected) {
 
                 socket.emit("login", data);
