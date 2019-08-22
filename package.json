@@ -28,7 +28,7 @@
     "node": ">=8.9.0"
   },
   "scripts": {
-    "start": "egg-scripts start  --port=7002 --host=47.103.63.239   --daemon --title=egg-server-gopay --sticky",
+    "start": "egg-scripts start  --port=7002 --host=172.19.87.165  --daemon --title=egg-server-gopay --sticky",
     "stop": "egg-scripts stop --title=egg-server-gopay",
     "dev": "egg-bin dev --sticky",
     "debug": "egg-bin debug",
