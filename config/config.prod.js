@@ -45,16 +45,16 @@ module.exports = appInfo => {
     key: '9vApxLk5G3PAsJrM', //16位 对称公钥
     iv: Date.now() * 1000,  //16位 偏移量
   };
-  config.cluster = {
-    listen: {
-      port: 7001,
-      hostname: '47.103.63.239',
-      // https:{
-      //   key:"D:/work/ssl/0_xingyumeng.com.key",
-      //   cert:"D:/worssl/1_xingyumeng.com_bundle.pem"
-      //  }
-    },
+  // config.cluster = {
+  //   listen: {
+  //     port: 7002,
+  //     hostname: '47.103.63.239',
+  //     // https:{
+  //     //   key:"D:/work/ssl/0_xingyumeng.com.key",
+  //     //   cert:"D:/worssl/1_xingyumeng.com_bundle.pem"
+  //     //  }
+  //   },
 
-  };
+  // };
   return config;
 };
