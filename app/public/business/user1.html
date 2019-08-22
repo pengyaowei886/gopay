@@ -30,7 +30,7 @@
                 { type: 2, value: 6 },
                 { type: 2, value: 2 }]
             };
-            var socket = io("ws://@49.235.81.242:7001/sss");
+            var socket = io("ws://49.235.81.242:80/sss");
             // var socket = io("ws://127.0.0.1:7001/sss");
             console.log(socket)
 
@@ -71,7 +71,7 @@
             // });
             socket.emit("compare_ready", cardtool);
             // } else {
-            //     //虚假的连接，其实是断开
+            //     //虚假的连接，其实
             //     console.log("wocao......")
             // }
         })

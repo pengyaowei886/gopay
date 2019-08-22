@@ -15,11 +15,11 @@ module.exports = appInfo => {
     }
   };
   //请求格式和是否跨域
-  config.cors = {
-    allowMethods: 'GET,POST,PUT,DELETE,OPTIONS',
-    credentials: true,
-    origin: '*'
-  }
+  // config.cors = {
+  //   allowMethods: 'GET,POST,PUT,DELETE,OPTIONS',
+  //   credentials: true,
+  //   origin: '*'
+  // }
   config.mysql = {
     // 单数据库信息配置
     client: {
@@ -47,8 +47,8 @@ module.exports = appInfo => {
   };
   config.cluster = {
     listen: {
-      port: 7001,
-      hostname: '172.17.0.17',
+      port: 7002,
+      hostname: '192.168.1.144',
       // https:{
       //   key:"D:/work/ssl/0_xingyumeng.com.key",
       //   cert:"D:/worssl/1_xingyumeng.com_bundle.pem"
@@ -56,5 +56,8 @@ module.exports = appInfo => {
     },
 
   };
+
+
+ 
   return config;
 };
